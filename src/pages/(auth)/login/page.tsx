@@ -28,7 +28,7 @@ const LoginPage = () => {
           height={600}
           style={{
             objectFit: "cover",
-            width: "calc(100vh *1.2)",
+           // width: "calc(100vh *1.2)",
             height: "60%",
           }}
           className="auth__container--image"

@@ -1,0 +1,15 @@
+.assets-page{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    &__header{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        &__title{
+            font-size: 24px;
+            font-weight: 600;
+        }
+    }
+}

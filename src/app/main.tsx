@@ -2,6 +2,7 @@
 
 import Header from "@/components/Header/page";
 import Sidebar from "@/components/Sidebar/page";
+import AssetsPage from "@/pages/(assets)/assets/page";
 import LoginPage from "@/pages/(auth)/login/page";
 import HomePage from "@/pages/home/page";
 import { authSelector } from "@/reduxs/reducers/auth_reducer";
@@ -25,7 +26,7 @@ export default function Main() {
           <div className="app-layout__container">
             <Header onClick={handleCollapse} collapse={collapse} />
             <div className="app-main">
-              <HomePage />
+              <AssetsPage />
             </div>
           </div>
         </>
