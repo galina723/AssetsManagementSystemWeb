@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button, Input } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { addAuth } from "@/reduxs/reducers/auth_reducer";
+import { addAuth } from "@/redux/reducers/auth_reducer";
+import Link from "next/link";
 
 const LoginPage = () => {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ const LoginPage = () => {
   const handleTryLogin = () => {
     if (userName == "1" && password == "1") {
       dispatch(addAuth(true));
+      localStorage.setItem("auth", "true");
     }
   };
 
@@ -28,7 +30,7 @@ const LoginPage = () => {
           height={600}
           style={{
             objectFit: "cover",
-           // width: "calc(100vh *1.2)",
+            // width: "calc(100vh *1.2)",
             height: "60%",
           }}
           className="auth__container--image"
@@ -37,7 +39,7 @@ const LoginPage = () => {
           <div className="auth__container--content--section auth__container--content--section-1">
             <div className="auth__container--content__title">Sign in</div>
             <div className="auth__container--content__sub-title">
-              Welcome to Assets Manager System
+              Welcome to Assets Management System
             </div>
           </div>
           <div className="auth__container--content--section auth__container--content--section-2">
@@ -58,9 +60,9 @@ const LoginPage = () => {
           </div>
           <div className="auth__container--content--section auth__container--content--section-3">
             <div className="auth__container--content__forgot">
-              <a href="#" className="auth__container--content__forgot--btn">
+              <Link href="#" className="auth__container--content__forgot--btn">
                 <i>Forgot password?</i>
-              </a>
+              </Link>
             </div>
             <Button
               onClick={handleTryLogin}

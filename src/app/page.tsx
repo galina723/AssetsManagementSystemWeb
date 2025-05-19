@@ -1,13 +1,14 @@
 "use client";
 
-import { Provider } from "react-redux";
-import store from "@/reduxs/store";
-import Main from "./main";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function Home() {
-  return (
-    <Provider store={store}>
-      <Main />
-    </Provider>
-  );
+export default function HomeRedirect() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/home");
+  }, [router]);
+
+  return null;
 }

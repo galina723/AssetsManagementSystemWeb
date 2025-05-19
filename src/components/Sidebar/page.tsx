@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import MenuIcon from "@mui/icons-material/Menu";
 
 interface Props {
@@ -11,31 +12,31 @@ const Sidebar: FC<Props> = (props) => {
 
   return (
     <div className="app-sidebar" style={{ width: collapse ? 0 : 250 }}>
-      <a className="app-sidebar__logo" href="#">
+      <Link className="app-sidebar__logo" href="/">
         <Image
           src="/logos/logo.png"
           alt={""}
           width={collapse ? 0 : 200}
           height={60}
         />
-      </a>
+      </Link>
       <div className="app-sidebar__menu">
-        <a className="app-sidebar__menu__item" href="#">
+        <Link className="app-sidebar__menu__item" href="/assets">
           <MenuIcon />
-          Menu 1
-        </a>
-        <a className="app-sidebar__menu__item" href="#">
+          Assets
+        </Link>
+        <Link className="app-sidebar__menu__item" href="/Warehouse">
           <MenuIcon />
-          Menu 2
-        </a>
-        <a className="app-sidebar__menu__item" href="#">
+          Warehouse
+        </Link>
+        <Link className="app-sidebar__menu__item" href="#">
           <MenuIcon />
           Menu 3
-        </a>
-        <a className="app-sidebar__menu__item" href="#">
+        </Link>
+        <Link className="app-sidebar__menu__item" href="#">
           <MenuIcon />
           Menu 4
-        </a>
+        </Link>
       </div>
     </div>
   );

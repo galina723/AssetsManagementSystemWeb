@@ -2,17 +2,25 @@
 
 import Header from "@/components/Header/page";
 import Sidebar from "@/components/Sidebar/page";
-import AssetsPage from "@/pages/(assets)/assets/page";
-import LoginPage from "@/pages/(auth)/login/page";
-import HomePage from "@/pages/home/page";
-import { authSelector } from "@/reduxs/reducers/auth_reducer";
-import { useState } from "react";
+import { authSelector } from "@/redux/reducers/auth_reducer";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import LoginPage from "./(auth)/login/page";
 
-export default function Main() {
+export default function HomeLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const isAuth = useSelector(authSelector);
 
   const [collapse, setCollapsed] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(isAuth.authData.toString());
+
+  useEffect(() => {
+    const isAuthStatus = localStorage.getItem("auth");
+    setIsAuthed(isAuthStatus);
+  }, [isAuth]);
 
   const handleCollapse = () => {
     setCollapsed(!collapse);
@@ -20,14 +28,12 @@ export default function Main() {
 
   return (
     <div className="app-layout">
-      {isAuth.authData ? (
+      {isAuthed == "true" ? (
         <>
           <Sidebar collapse={collapse} />
           <div className="app-layout__container">
             <Header onClick={handleCollapse} collapse={collapse} />
-            <div className="app-main">
-              <AssetsPage />
-            </div>
+            <div className="app-main">{children}</div>
           </div>
         </>
       ) : (
