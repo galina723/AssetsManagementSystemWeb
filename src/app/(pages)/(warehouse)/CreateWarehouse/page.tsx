@@ -13,7 +13,7 @@ const CreateAssetsPage = () => {
     <div className="assets-page">
       <div className="assets-page__header">
         <div className="assets-page__header__title assets-page__header__title__group">
-          <IconButton onClick={() => router.push("/warehouse")}>
+          <IconButton onClick={() => router.push("/Warehouse")}>
             <ArrowBackIcon />
           </IconButton>
           <span>Create Warehouse</span>
