@@ -1,7 +1,7 @@
 "use client";
 
-import Header from "@/components/Header/page";
-import Sidebar from "@/components/Sidebar/page";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import { authSelector } from "@/redux/reducers/auth_reducer";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
