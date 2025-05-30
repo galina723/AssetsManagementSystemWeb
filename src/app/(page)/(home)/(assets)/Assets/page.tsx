@@ -109,7 +109,7 @@ const AssetsPage = () => {
         <TableContainer
           sx={{
             maxHeight:
-              "calc(100vh - (64px + 24px + 37px + 24px + 24px + 52px))",
+              "calc(100vh - (64px + 24px + 37px + 24px + 24px + 52px + 48px + 24px))",
           }}
         >
           <Table

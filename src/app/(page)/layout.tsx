@@ -1,20 +1,17 @@
 "use client";
 
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
 import { authSelector } from "@/redux/reducers/auth_reducer";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import LoginPage from "./(auth)/(Login)/page";
 
-export default function HomeLayout({
+export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const isAuth = useSelector(authSelector);
 
-  const [collapse, setCollapsed] = useState(false);
   const [isAuthed, setIsAuthed] = useState(isAuth.authData.toString());
   const [isLoading, setisLoading] = useState(true);
 
