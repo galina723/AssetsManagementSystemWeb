@@ -34,9 +34,17 @@ const Sidebar: FC<Props> = (props) => {
           Warehouse
         </Link>
 
-        <Link className="app-sidebar__menu__item" href="#">
+        <Link className="app-sidebar__menu__item" href="/accounts">
           <MenuIcon />
-          Menu 4
+          Account
+        </Link>
+        <Link className="app-sidebar__menu__item" href="/works">
+          <MenuIcon />
+          Work
+        </Link>
+        <Link className="app-sidebar__menu__item" href="/flows">
+          <MenuIcon />
+          Flow
         </Link>
       </div>
     </div>
