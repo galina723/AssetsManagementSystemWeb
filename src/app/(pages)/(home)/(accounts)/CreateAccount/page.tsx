@@ -5,9 +5,43 @@ import React from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
+import { DynamicModel } from "@/models/dynamicModel";
+import Dropdown from "@/components/Dropdown";
+import { DatePicker } from "@mui/x-date-pickers";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 
-const CreateAssetsPage = () => {
+const CreateAccountPage = () => {
   const router = useRouter();
+
+  const positionData: DynamicModel[] = [
+    {
+      name: "Admin",
+      value: "Admin",
+    },
+    {
+      name: "Manager",
+      value: "Manager",
+    },
+    {
+      name: "Staff",
+      value: "Staff",
+    },
+  ];
+
+  const departmentData: DynamicModel[] = [
+    {
+      name: "R&D department",
+      value: "R&D department",
+    },
+    {
+      name: "HR department",
+      value: "HR department",
+    },
+    {
+      name: "Fixing department",
+      value: "Fixing department",
+    },
+  ];
 
   return (
     <div className="assets-page">
@@ -43,19 +77,23 @@ const CreateAssetsPage = () => {
           <span className="assets-page__container__group--label">
             Position:{" "}
           </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <Dropdown listData={positionData} />
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
             Department:{" "}
           </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <Dropdown listData={departmentData} />
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
             BirthDay:{" "}
           </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <div className="date-picker">
+            <DemoContainer components={["DatePicker"]}>
+              <DatePicker label="Basic date picker" />
+            </DemoContainer>
+          </div>
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">Phone: </span>
@@ -67,11 +105,14 @@ const CreateAssetsPage = () => {
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">Note: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <TextField
+            multiline
+            className="assets-page__container__group--input"
+          ></TextField>
         </div>
       </div>
     </div>
   );
 };
 
-export default CreateAssetsPage;
+export default CreateAccountPage;

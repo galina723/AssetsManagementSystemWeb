@@ -9,6 +9,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 interface Data {
@@ -44,35 +45,35 @@ function createData(
 
 const rows = [
   createData(
-    "Fl1",
-    "Change laptop Dell to warehouse",
+    "Wk1",
+    "Fix Macbook pro",
     "Nguyen Van A",
     "Processing",
     "20/10/2024"
   ),
   createData(
-    "Fl2",
-    "Liquidation PC intel 7250H",
+    "Wk2",
+    "Maintenance Air cool",
     "Nguyen Tran Hoang A",
     "Done",
     "30/07/2025"
   ),
   createData(
-    "Fl3",
-    "Change laptop HP 125U to warehouse",
+    "Wk3",
+    "Fixing laptop Dell",
     "Nguyen Thi C",
     "Processing",
     "25/05/2025"
   ),
 ];
 
-const FlowPage = () => {
+const WorkPage = () => {
   const headCells: readonly HeadCell[] = [
     {
       id: "id",
       numeric: false,
       disablePadding: false,
-      label: "Flow id",
+      label: "Work id",
     },
     {
       id: "name",
@@ -100,10 +101,12 @@ const FlowPage = () => {
     },
   ];
 
+  const router = useRouter();
+
   return (
     <div className="assets-page">
       <div className="assets-page__header">
-        <div className="assets-page__header__title">Flows</div>
+        <div className="assets-page__header__title">Works</div>
         {/* <div className="assets-page__header__group">
           <Button
             startIcon={<AddIcon />}
@@ -148,7 +151,7 @@ const FlowPage = () => {
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => console.log(event, row.id)}
+                    onClick={() => router.push("/DetailWork")}
                     role="checkbox"
                     tabIndex={-1}
                     key={row.id}
@@ -194,4 +197,4 @@ const FlowPage = () => {
   );
 };
 
-export default FlowPage;
+export default WorkPage;

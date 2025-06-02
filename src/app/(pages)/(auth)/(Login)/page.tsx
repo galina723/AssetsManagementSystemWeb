@@ -39,7 +39,7 @@ const LoginPage = () => {
           <div className="auth__container--content--section auth__container--content--section-1">
             <div className="auth__container--content__title">Sign in</div>
             <div className="auth__container--content__sub-title">
-              Welcome to Assets Management System
+              Welcome to AMS
             </div>
           </div>
           <div className="auth__container--content--section auth__container--content--section-2">

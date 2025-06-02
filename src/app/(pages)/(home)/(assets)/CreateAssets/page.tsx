@@ -5,9 +5,54 @@ import React from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
+import { DynamicModel } from "@/models/dynamicModel";
+import Dropdown from "@/components/Dropdown";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { DatePicker } from "@mui/x-date-pickers";
 
 const CreateAssetsPage = () => {
   const router = useRouter();
+
+  const departmentData: DynamicModel[] = [
+    {
+      name: "R&D department",
+      value: "R&D department",
+    },
+    {
+      name: "HR department",
+      value: "HR department",
+    },
+    {
+      name: "Fixing department",
+      value: "Fixing department",
+    },
+  ];
+
+  const userData: DynamicModel[] = [
+    {
+      name: "Nguyen Van A",
+      value: "Nguyen Van A",
+    },
+    {
+      name: "Nguyen Thi C",
+      value: "Nguyen Thi C",
+    },
+    {
+      name: "Tran Van D",
+      value: "Tran Van D",
+    },
+  ];
+
+  const unitData: DynamicModel[] = [
+    {
+      name: "VND",
+      value: "VND",
+    },
+    {
+      name: "USD",
+      value: "USD",
+    },
+  ];
 
   return (
     <div className="assets-page">
@@ -51,19 +96,23 @@ const CreateAssetsPage = () => {
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">User: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <Dropdown listData={userData} />
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
-            Position:{" "}
+            Department:{" "}
           </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <Dropdown listData={departmentData} />
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
             Date Of Purchase:{" "}
           </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <div className="date-picker">
+            <DemoContainer components={["DatePicker"]}>
+              <DatePicker label="Basic date picker" />
+            </DemoContainer>
+          </div>
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
@@ -77,11 +126,14 @@ const CreateAssetsPage = () => {
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">Unit: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <Dropdown listData={unitData} />
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">Note: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <TextField
+            multiline
+            className="assets-page__container__group--input"
+          ></TextField>
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">

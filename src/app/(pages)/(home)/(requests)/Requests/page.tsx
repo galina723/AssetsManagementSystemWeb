@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@mui/material";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 interface Data {
   id: string;
@@ -44,35 +45,35 @@ function createData(
 
 const rows = [
   createData(
-    "Wk1",
-    "Fix Macbook pro",
+    "RQ1",
+    "Change laptop Dell to warehouse",
     "Nguyen Van A",
     "Processing",
     "20/10/2024"
   ),
   createData(
-    "Wk2",
-    "Maintenance Air cool",
+    "RQ2",
+    "Liquidation PC intel 7250H",
     "Nguyen Tran Hoang A",
     "Done",
     "30/07/2025"
   ),
   createData(
-    "Wk3",
-    "Fixing laptop Dell",
+    "RQ3",
+    "Change laptop HP 125U to warehouse",
     "Nguyen Thi C",
     "Processing",
     "25/05/2025"
   ),
 ];
 
-const WorkPage = () => {
+const RequestsPage = () => {
   const headCells: readonly HeadCell[] = [
     {
       id: "id",
       numeric: false,
       disablePadding: false,
-      label: "Work id",
+      label: "Requests id",
     },
     {
       id: "name",
@@ -99,11 +100,12 @@ const WorkPage = () => {
       label: "Created date",
     },
   ];
+  const router = useRouter();
 
   return (
     <div className="assets-page">
       <div className="assets-page__header">
-        <div className="assets-page__header__title">Works</div>
+        <div className="assets-page__header__title">Requests</div>
         {/* <div className="assets-page__header__group">
           <Button
             startIcon={<AddIcon />}
@@ -148,7 +150,7 @@ const WorkPage = () => {
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => console.log(event, row.id)}
+                    onClick={() => router.push("/DetailRequest")}
                     role="checkbox"
                     tabIndex={-1}
                     key={row.id}
@@ -194,4 +196,4 @@ const WorkPage = () => {
   );
 };
 
-export default WorkPage;
+export default RequestsPage;

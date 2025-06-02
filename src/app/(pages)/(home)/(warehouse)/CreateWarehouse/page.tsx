@@ -5,9 +5,30 @@ import React from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
+import Dropdown from "@/components/Dropdown";
+import { DynamicModel } from "@/models/dynamicModel";
 
-const CreateAssetsPage = () => {
+const CreateWarehousePage = () => {
   const router = useRouter();
+
+  const locationData: DynamicModel[] = [
+    {
+      name: "Binh Duong",
+      value: "Binh Duong",
+    },
+    {
+      name: "Thu Dau Mot",
+      value: "Thu Dau Mot",
+    },
+    {
+      name: "Tan Uyen",
+      value: "Tan Uyen",
+    },
+    {
+      name: "TP Ho Chi Minh",
+      value: "TP Ho Chi Minh",
+    },
+  ];
 
   return (
     <div className="assets-page">
@@ -53,15 +74,18 @@ const CreateAssetsPage = () => {
           <span className="assets-page__container__group--label">
             Location:{" "}
           </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <Dropdown listData={locationData} />
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">Note: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+          <TextField
+            multiline
+            className="assets-page__container__group--input"
+          ></TextField>
         </div>
       </div>
     </div>
   );
 };
 
-export default CreateAssetsPage;
+export default CreateWarehousePage;

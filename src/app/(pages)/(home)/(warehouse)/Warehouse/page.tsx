@@ -3,7 +3,6 @@
 import {
   Button,
   IconButton,
-  Link,
   Table,
   TableBody,
   TableCell,
@@ -139,21 +138,41 @@ const AssetsPage = () => {
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => console.log(event, row.id)}
                     role="checkbox"
                     tabIndex={-1}
                     key={row.id}
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell component="th" scope="row" padding="none">
-                      <Link className="link-url-table" href="/AssetDetail">
+                      {/* <Link className="link-url-table" href="/AssetDetail">
                         {row.id}
-                      </Link>
+                      </Link> */}
+                      {row.id}
                     </TableCell>
-                    <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="center">{row.unit}</TableCell>
-                    <TableCell align="center">{row.status}</TableCell>
-                    <TableCell align="center">{row.note}</TableCell>
+                    <TableCell
+                      onClick={() => router.push("/AssetDetail")}
+                      align="left"
+                    >
+                      {row.name}
+                    </TableCell>
+                    <TableCell
+                      onClick={() => router.push("/AssetDetail")}
+                      align="center"
+                    >
+                      {row.unit}
+                    </TableCell>
+                    <TableCell
+                      onClick={() => router.push("/AssetDetail")}
+                      align="center"
+                    >
+                      {row.status}
+                    </TableCell>
+                    <TableCell
+                      onClick={() => router.push("/AssetDetail")}
+                      align="center"
+                    >
+                      {row.note}
+                    </TableCell>
                     <TableCell align="center">
                       <div>
                         <IconButton

@@ -144,7 +144,7 @@ const AssetsPage = () => {
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => console.log(event, row.id)}
+                    onClick={() => router.push("/DetailAsset")}
                     role="checkbox"
                     tabIndex={-1}
                     key={row.id}

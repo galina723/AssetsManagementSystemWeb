@@ -14,7 +14,7 @@ const Sidebar: FC<Props> = (props) => {
     <div className="app-sidebar" style={{ width: collapse ? 0 : 250 }}>
       <Link className="app-sidebar__logo" href="/">
         <Image
-          src="/logos/logo.png"
+          src="/logos/logo.jpg"
           alt={""}
           width={collapse ? 0 : 200}
           height={60}
@@ -42,9 +42,9 @@ const Sidebar: FC<Props> = (props) => {
           <MenuIcon />
           Work
         </Link>
-        <Link className="app-sidebar__menu__item" href="/Flows">
+        <Link className="app-sidebar__menu__item" href="/Requests">
           <MenuIcon />
-          Flow
+          Requests
         </Link>
       </div>
     </div>

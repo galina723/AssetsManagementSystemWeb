@@ -138,19 +138,43 @@ const AssetsPage = () => {
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => console.log(event, row.id)}
                     role="checkbox"
                     tabIndex={-1}
                     key={row.id}
                     sx={{ cursor: "pointer" }}
                   >
-                    <TableCell component="th" scope="row" padding="none">
+                    <TableCell
+                      onClick={() => router.push("/DetailAsset")}
+                      component="th"
+                      scope="row"
+                      padding="none"
+                    >
                       {row.id}
                     </TableCell>
-                    <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="center">{row.unit}</TableCell>
-                    <TableCell align="center">{row.status}</TableCell>
-                    <TableCell align="center">{row.note}</TableCell>
+                    <TableCell
+                      align="left"
+                      onClick={() => router.push("/DetailAsset")}
+                    >
+                      {row.name}
+                    </TableCell>
+                    <TableCell
+                      onClick={() => router.push("/DetailAsset")}
+                      align="center"
+                    >
+                      {row.unit}
+                    </TableCell>
+                    <TableCell
+                      onClick={() => router.push("/DetailAsset")}
+                      align="center"
+                    >
+                      {row.status}
+                    </TableCell>
+                    <TableCell
+                      onClick={() => router.push("/DetailAsset")}
+                      align="center"
+                    >
+                      {row.note}
+                    </TableCell>
                     <TableCell align="center">
                       <div>
                         <IconButton
