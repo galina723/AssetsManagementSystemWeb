@@ -35,7 +35,7 @@ const CreateAssetsPage = () => {
       >
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
-            Device name:{" "}
+            Warehouse name:{" "}
           </span>
           <TextField className="assets-page__container__group--input"></TextField>
         </div>
@@ -45,60 +45,18 @@ const CreateAssetsPage = () => {
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
-            Currency:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">User: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Position:{" "}
+            Quality:{" "}
           </span>
           <TextField className="assets-page__container__group--input"></TextField>
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
-            Date Of Purchase:{" "}
+            Location:{" "}
           </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Quantity:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Price: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Unit: </span>
           <TextField className="assets-page__container__group--input"></TextField>
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">Note: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Purpose:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Guarantee Condition:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Supplier:{" "}
-          </span>
           <TextField className="assets-page__container__group--input"></TextField>
         </div>
       </div>

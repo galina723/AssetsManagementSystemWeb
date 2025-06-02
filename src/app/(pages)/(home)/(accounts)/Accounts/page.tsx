@@ -3,7 +3,6 @@
 import {
   Button,
   IconButton,
-  Link,
   Table,
   TableBody,
   TableCell,
@@ -50,12 +49,12 @@ function createData(
 }
 
 const rows = [
-  createData("WH1", "PhuChanh 1", "1", "112, Phu chanh", ""),
-  createData("WH2", "ABC", "8", "323, Duong Nam Ky", ""),
-  createData("WH3", "PPO Tan Phu", "1", "222, Tan Phu", ""),
+  createData("NV1", "Nguyen Van A", "Nhan vien", "Phong nhan su", ""),
+  createData("NV2", "Nguyen Thi C", "Ki thuat vien", "Phong sua chua", ""),
+  createData("WH3", "Tran Thi B", "Quan ly kho", "Phong kho", ""),
 ];
 
-const AssetsPage = () => {
+const AccountsPage = () => {
   const router = useRouter();
 
   const headCells: readonly HeadCell[] = [
@@ -63,25 +62,25 @@ const AssetsPage = () => {
       id: "id",
       numeric: false,
       disablePadding: false,
-      label: "Warehouse id",
+      label: "Account id",
     },
     {
       id: "name",
       numeric: false,
       disablePadding: false,
-      label: "Name",
+      label: "Full name",
     },
     {
       id: "unit",
       numeric: false,
       disablePadding: false,
-      label: "Quality",
+      label: "Position",
     },
     {
       id: "status",
       numeric: false,
       disablePadding: false,
-      label: "Location",
+      label: "Department",
     },
     {
       id: "note",
@@ -94,14 +93,14 @@ const AssetsPage = () => {
   return (
     <div className="assets-page">
       <div className="assets-page__header">
-        <div className="assets-page__header__title">Warehouse</div>
+        <div className="assets-page__header__title">Account</div>
         <div className="assets-page__header__group">
           <Button
             startIcon={<AddIcon />}
             variant="contained"
-            onClick={() => router.push("CreateWarehouse")}
+            onClick={() => router.push("CreateAccount")}
           >
-            Add warehouse
+            Add account
           </Button>
         </div>
       </div>
@@ -146,9 +145,7 @@ const AssetsPage = () => {
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell component="th" scope="row" padding="none">
-                      <Link className="link-url-table" href="/AssetDetail">
-                        {row.id}
-                      </Link>
+                      {row.id}
                     </TableCell>
                     <TableCell align="left">{row.name}</TableCell>
                     <TableCell align="center">{row.unit}</TableCell>
@@ -158,7 +155,7 @@ const AssetsPage = () => {
                       <div>
                         <IconButton
                           color="success"
-                          onClick={() => router.push("EditWarehouse")}
+                          onClick={() => router.push("EditAccount")}
                         >
                           <EditIcon />
                         </IconButton>
@@ -187,4 +184,4 @@ const AssetsPage = () => {
   );
 };
 
-export default AssetsPage;
+export default AccountsPage;

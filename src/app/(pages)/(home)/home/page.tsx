@@ -46,9 +46,9 @@ const HomePage = () => {
           <BarChart
             xAxis={[{ data: ["group A", "group B", "group C"] }]}
             series={[
-              { data: [4, 3, 5] },
-              { data: [1, 6, 3] },
-              { data: [2, 5, 6] },
+              { data: [4, 3, 5], color: "rgba(173, 216, 230, 0.7)" },
+              { data: [1, 6, 3], color: "rgba(144, 238, 144, 0.7)" },
+              { data: [2, 5, 6], color: "rgba(255, 182, 193, 0.7)" },
             ]}
             height={300}
           />
@@ -61,9 +61,24 @@ const HomePage = () => {
             series={[
               {
                 data: [
-                  { id: 0, value: 10, label: "series A" },
-                  { id: 1, value: 15, label: "series B" },
-                  { id: 2, value: 20, label: "series C" },
+                  {
+                    id: 0,
+                    value: 10,
+                    label: "Series A",
+                    color: "rgba(255, 160, 122, 0.7)",
+                  },
+                  {
+                    id: 1,
+                    value: 15,
+                    label: "Series B",
+                    color: "rgba(221, 160, 221, 0.7)",
+                  },
+                  {
+                    id: 2,
+                    value: 20,
+                    label: "Series C",
+                    color: "rgba(175, 238, 238, 0.7)",
+                  },
                 ],
               },
             ]}

@@ -3,7 +3,6 @@
 import {
   Button,
   IconButton,
-  Link,
   Table,
   TableBody,
   TableCell,
@@ -17,6 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from "next/navigation";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 interface Data {
   id: string;
@@ -50,9 +50,9 @@ function createData(
 }
 
 const rows = [
-  createData("WH1", "PhuChanh 1", "1", "112, Phu chanh", ""),
-  createData("WH2", "ABC", "8", "323, Duong Nam Ky", ""),
-  createData("WH3", "PPO Tan Phu", "1", "222, Tan Phu", ""),
+  createData("Ad1", "Laptop Dell", "1", "Using", ""),
+  createData("Ad2", "iMac M4", "8", "Using", ""),
+  createData("Ad3", "Macbook Pro", "1", "Fixing", ""),
 ];
 
 const AssetsPage = () => {
@@ -63,7 +63,7 @@ const AssetsPage = () => {
       id: "id",
       numeric: false,
       disablePadding: false,
-      label: "Warehouse id",
+      label: "Asset id",
     },
     {
       id: "name",
@@ -75,13 +75,13 @@ const AssetsPage = () => {
       id: "unit",
       numeric: false,
       disablePadding: false,
-      label: "Quality",
+      label: "Unit",
     },
     {
       id: "status",
       numeric: false,
       disablePadding: false,
-      label: "Location",
+      label: "Status",
     },
     {
       id: "note",
@@ -94,14 +94,19 @@ const AssetsPage = () => {
   return (
     <div className="assets-page">
       <div className="assets-page__header">
-        <div className="assets-page__header__title">Warehouse</div>
+        <div className="assets-page__header__title assets-page__header__title__group">
+          <IconButton onClick={() => router.push("/Warehouse")}>
+            <ArrowBackIcon />
+          </IconButton>
+          <span>Assets</span>
+        </div>
         <div className="assets-page__header__group">
           <Button
             startIcon={<AddIcon />}
             variant="contained"
-            onClick={() => router.push("CreateWarehouse")}
+            onClick={() => router.push("CreateAssets")}
           >
-            Add warehouse
+            Add asset
           </Button>
         </div>
       </div>
@@ -146,9 +151,7 @@ const AssetsPage = () => {
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell component="th" scope="row" padding="none">
-                      <Link className="link-url-table" href="/AssetDetail">
-                        {row.id}
-                      </Link>
+                      {row.id}
                     </TableCell>
                     <TableCell align="left">{row.name}</TableCell>
                     <TableCell align="center">{row.unit}</TableCell>
@@ -158,7 +161,7 @@ const AssetsPage = () => {
                       <div>
                         <IconButton
                           color="success"
-                          onClick={() => router.push("EditWarehouse")}
+                          onClick={() => router.push("EditAssets")}
                         >
                           <EditIcon />
                         </IconButton>

@@ -13,7 +13,7 @@ export default function HomeLayout({
   const isAuth = useSelector(authSelector);
 
   const [isAuthed, setIsAuthed] = useState(isAuth.authData.toString());
-  const [isLoading, setisLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const isAuthStatus = localStorage.getItem("auth");
@@ -21,7 +21,7 @@ export default function HomeLayout({
     if (!isAuthStatus) {
       localStorage.setItem("auth", "false");
     }
-    setisLoading(false);
+    setIsLoading(false);
   }, [isAuth]);
 
   return isLoading ? (

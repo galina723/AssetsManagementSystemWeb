@@ -1,9 +1,6 @@
 "use client";
 
 import {
-  Button,
-  IconButton,
-  Link,
   Table,
   TableBody,
   TableCell,
@@ -13,10 +10,6 @@ import {
   TableRow,
 } from "@mui/material";
 import React from "react";
-import AddIcon from "@mui/icons-material/Add";
-import { useRouter } from "next/navigation";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 
 interface Data {
   id: string;
@@ -50,20 +43,36 @@ function createData(
 }
 
 const rows = [
-  createData("WH1", "PhuChanh 1", "1", "112, Phu chanh", ""),
-  createData("WH2", "ABC", "8", "323, Duong Nam Ky", ""),
-  createData("WH3", "PPO Tan Phu", "1", "222, Tan Phu", ""),
+  createData(
+    "Fl1",
+    "Change laptop Dell to warehouse",
+    "Nguyen Van A",
+    "Processing",
+    "20/10/2024"
+  ),
+  createData(
+    "Fl2",
+    "Liquidation PC intel 7250H",
+    "Nguyen Tran Hoang A",
+    "Done",
+    "30/07/2025"
+  ),
+  createData(
+    "Fl3",
+    "Change laptop HP 125U to warehouse",
+    "Nguyen Thi C",
+    "Processing",
+    "25/05/2025"
+  ),
 ];
 
-const AssetsPage = () => {
-  const router = useRouter();
-
+const FlowPage = () => {
   const headCells: readonly HeadCell[] = [
     {
       id: "id",
       numeric: false,
       disablePadding: false,
-      label: "Warehouse id",
+      label: "Flow id",
     },
     {
       id: "name",
@@ -75,35 +84,35 @@ const AssetsPage = () => {
       id: "unit",
       numeric: false,
       disablePadding: false,
-      label: "Quality",
+      label: "Handler",
     },
     {
       id: "status",
       numeric: false,
       disablePadding: false,
-      label: "Location",
+      label: "Status",
     },
     {
       id: "note",
       numeric: false,
       disablePadding: false,
-      label: "Note",
+      label: "Created date",
     },
   ];
 
   return (
     <div className="assets-page">
       <div className="assets-page__header">
-        <div className="assets-page__header__title">Warehouse</div>
-        <div className="assets-page__header__group">
+        <div className="assets-page__header__title">Flows</div>
+        {/* <div className="assets-page__header__group">
           <Button
             startIcon={<AddIcon />}
             variant="contained"
-            onClick={() => router.push("CreateWarehouse")}
+            onClick={() => router.push("CreateAssets")}
           >
-            Add warehouse
+            Add flow
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div id="table-data" className="assets-page__container">
@@ -129,9 +138,9 @@ const AssetsPage = () => {
                     {headCell.label}
                   </TableCell>
                 ))}
-                <TableCell align={"center"} padding={"none"}>
+                {/* <TableCell align={"center"} padding={"none"}>
                   Action
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -146,19 +155,17 @@ const AssetsPage = () => {
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell component="th" scope="row" padding="none">
-                      <Link className="link-url-table" href="/AssetDetail">
-                        {row.id}
-                      </Link>
+                      {row.id}
                     </TableCell>
                     <TableCell align="left">{row.name}</TableCell>
                     <TableCell align="center">{row.unit}</TableCell>
                     <TableCell align="center">{row.status}</TableCell>
                     <TableCell align="center">{row.note}</TableCell>
-                    <TableCell align="center">
+                    {/* <TableCell align="center">
                       <div>
                         <IconButton
                           color="success"
-                          onClick={() => router.push("EditWarehouse")}
+                          onClick={() => router.push("EditAssets")}
                         >
                           <EditIcon />
                         </IconButton>
@@ -166,7 +173,7 @@ const AssetsPage = () => {
                           <DeleteIcon />
                         </IconButton>
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 );
               })}
@@ -187,4 +194,4 @@ const AssetsPage = () => {
   );
 };
 
-export default AssetsPage;
+export default FlowPage;

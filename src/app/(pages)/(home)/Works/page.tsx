@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  Button,
-  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -11,11 +9,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import React, { useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
-import { useRouter } from "next/navigation";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
+import React from "react";
 
 interface Data {
   id: string;
@@ -49,20 +43,36 @@ function createData(
 }
 
 const rows = [
-  createData("WH1", "PhuChanh 1", "1", "Using", ""),
-  createData("WH2", "ABC", "8", "Using", ""),
-  createData("WH3", "PPO Tan Phu", "1", "Fixing", ""),
+  createData(
+    "Wk1",
+    "Fix Macbook pro",
+    "Nguyen Van A",
+    "Processing",
+    "20/10/2024"
+  ),
+  createData(
+    "Wk2",
+    "Maintenance Air cool",
+    "Nguyen Tran Hoang A",
+    "Done",
+    "30/07/2025"
+  ),
+  createData(
+    "Wk3",
+    "Fixing laptop Dell",
+    "Nguyen Thi C",
+    "Processing",
+    "25/05/2025"
+  ),
 ];
 
-const AccountsPage = () => {
-  const router = useRouter();
-
+const WorkPage = () => {
   const headCells: readonly HeadCell[] = [
     {
       id: "id",
       numeric: false,
       disablePadding: false,
-      label: "Warehouse id",
+      label: "Work id",
     },
     {
       id: "name",
@@ -74,7 +84,7 @@ const AccountsPage = () => {
       id: "unit",
       numeric: false,
       disablePadding: false,
-      label: "Unit",
+      label: "Handler",
     },
     {
       id: "status",
@@ -86,23 +96,23 @@ const AccountsPage = () => {
       id: "note",
       numeric: false,
       disablePadding: false,
-      label: "Note",
+      label: "Created date",
     },
   ];
 
   return (
     <div className="assets-page">
       <div className="assets-page__header">
-        <div className="assets-page__header__title">Account</div>
-        <div className="assets-page__header__group">
+        <div className="assets-page__header__title">Works</div>
+        {/* <div className="assets-page__header__group">
           <Button
             startIcon={<AddIcon />}
             variant="contained"
-            //onClick={() => router.push("CreateWarehouse")}
+            onClick={() => router.push("CreateAssets")}
           >
-            Add warehouse
+            Add flow
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div id="table-data" className="assets-page__container">
@@ -128,9 +138,9 @@ const AccountsPage = () => {
                     {headCell.label}
                   </TableCell>
                 ))}
-                <TableCell align={"center"} padding={"none"}>
+                {/* <TableCell align={"center"} padding={"none"}>
                   Action
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -151,11 +161,11 @@ const AccountsPage = () => {
                     <TableCell align="center">{row.unit}</TableCell>
                     <TableCell align="center">{row.status}</TableCell>
                     <TableCell align="center">{row.note}</TableCell>
-                    <TableCell align="center">
+                    {/* <TableCell align="center">
                       <div>
                         <IconButton
                           color="success"
-                          //onClick={() => router.push("EditWarehouse")}
+                          onClick={() => router.push("EditAssets")}
                         >
                           <EditIcon />
                         </IconButton>
@@ -163,7 +173,7 @@ const AccountsPage = () => {
                           <DeleteIcon />
                         </IconButton>
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 );
               })}
@@ -184,4 +194,4 @@ const AccountsPage = () => {
   );
 };
 
-export default AccountsPage;
+export default WorkPage;

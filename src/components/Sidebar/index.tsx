@@ -25,7 +25,7 @@ const Sidebar: FC<Props> = (props) => {
           <MenuIcon />
           Dashboard
         </Link>
-        <Link className="app-sidebar__menu__item" href="/assets">
+        <Link className="app-sidebar__menu__item" href="/Assets">
           <MenuIcon />
           Assets
         </Link>
@@ -34,15 +34,15 @@ const Sidebar: FC<Props> = (props) => {
           Warehouse
         </Link>
 
-        <Link className="app-sidebar__menu__item" href="/accounts">
+        <Link className="app-sidebar__menu__item" href="/Accounts">
           <MenuIcon />
           Account
         </Link>
-        <Link className="app-sidebar__menu__item" href="/works">
+        <Link className="app-sidebar__menu__item" href="/Works">
           <MenuIcon />
           Work
         </Link>
-        <Link className="app-sidebar__menu__item" href="/flows">
+        <Link className="app-sidebar__menu__item" href="/Flows">
           <MenuIcon />
           Flow
         </Link>

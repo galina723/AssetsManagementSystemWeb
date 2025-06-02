@@ -7,6 +7,9 @@
     flex-direction: column;
     gap: 16px;
     overflow: auto;
+    background-color: white;
+    border-radius: 16px;
+    padding: 24px;
     &__group {
       display: flex;
       flex-direction: row;
@@ -40,4 +43,8 @@
 
 .MuiInputBase-input {
   padding: 4px !important;
+}
+
+.link-url-table {
+  text-decoration: none !important;
 }

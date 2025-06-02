@@ -13,10 +13,10 @@ const CreateAssetsPage = () => {
     <div className="assets-page">
       <div className="assets-page__header">
         <div className="assets-page__header__title assets-page__header__title__group">
-          <IconButton onClick={() => router.push("/Warehouse")}>
+          <IconButton onClick={() => router.push("/Accounts")}>
             <ArrowBackIcon />
           </IconButton>
-          <span>Edit Warehouse</span>
+          <span>Create Account</span>
         </div>
         <div className="assets-page__header__group">
           <Button
@@ -35,24 +35,34 @@ const CreateAssetsPage = () => {
       >
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
-            Warehouse name:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Code: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Quality:{" "}
+            Full name:{" "}
           </span>
           <TextField className="assets-page__container__group--input"></TextField>
         </div>
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
-            Location:{" "}
+            Position:{" "}
           </span>
+          <TextField className="assets-page__container__group--input"></TextField>
+        </div>
+        <div className="assets-page__container__group">
+          <span className="assets-page__container__group--label">
+            Department:{" "}
+          </span>
+          <TextField className="assets-page__container__group--input"></TextField>
+        </div>
+        <div className="assets-page__container__group">
+          <span className="assets-page__container__group--label">
+            BirthDay:{" "}
+          </span>
+          <TextField className="assets-page__container__group--input"></TextField>
+        </div>
+        <div className="assets-page__container__group">
+          <span className="assets-page__container__group--label">Phone: </span>
+          <TextField className="assets-page__container__group--input"></TextField>
+        </div>
+        <div className="assets-page__container__group">
+          <span className="assets-page__container__group--label">Email: </span>
           <TextField className="assets-page__container__group--input"></TextField>
         </div>
         <div className="assets-page__container__group">
