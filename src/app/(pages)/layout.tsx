@@ -1,7 +1,5 @@
 "use client";
 
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
 import { authSelector } from "@/redux/reducers/auth_reducer";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -14,7 +12,6 @@ export default function HomeLayout({
 }>) {
   const isAuth = useSelector(authSelector);
 
-  const [collapse, setCollapsed] = useState(false);
   const [isAuthed, setIsAuthed] = useState(isAuth.authData.toString());
   const [isLoading, setisLoading] = useState(true);
 
@@ -27,25 +24,9 @@ export default function HomeLayout({
     setisLoading(false);
   }, [isAuth]);
 
-  const handleCollapse = () => {
-    setCollapsed(!collapse);
-  };
-
   return isLoading ? (
     <div></div>
   ) : (
-    <>
-      {isAuthed == "true" ? (
-        <div className="app-layout">
-          <Sidebar collapse={collapse} />
-          <div className="app-layout__container">
-            <Header onClick={handleCollapse} collapse={collapse} />
-            <div className="app-main">{children}</div>
-          </div>
-        </div>
-      ) : (
-        <LoginPage />
-      )}
-    </>
+    <>{isAuthed == "true" ? <>{children}</> : <LoginPage />}</>
   );
 }
