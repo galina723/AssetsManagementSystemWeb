@@ -51,7 +51,7 @@ const EditWarehousePage = () => {
 
       <div
         className="assets-page__container"
-        style={{ height: "calc(100vh - (64px + 24px + 64px + 24px))" }}
+        style={{ height: "calc(100vh - (64px + 24px + 64px + 24px + 64px))" }}
       >
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">

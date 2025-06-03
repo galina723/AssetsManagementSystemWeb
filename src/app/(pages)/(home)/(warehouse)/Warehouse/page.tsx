@@ -18,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 interface Data {
+  no: number;
   id: string;
   name: string;
   unit: string;
@@ -33,6 +34,7 @@ interface HeadCell {
 }
 
 function createData(
+  no: number,
   id: string,
   name: string,
   unit: string,
@@ -40,6 +42,7 @@ function createData(
   note: string
 ): Data {
   return {
+    no,
     id,
     name,
     unit,
@@ -49,15 +52,21 @@ function createData(
 }
 
 const rows = [
-  createData("WH1", "PhuChanh 1", "1", "112, Phu chanh", ""),
-  createData("WH2", "ABC", "8", "323, Duong Nam Ky", ""),
-  createData("WH3", "PPO Tan Phu", "1", "222, Tan Phu", ""),
+  createData(1, "WH1", "PhuChanh 1", "1", "112, Phu chanh", ""),
+  createData(2, "WH2", "ABC", "8", "323, Duong Nam Ky", ""),
+  createData(3, "WH3", "PPO Tan Phu", "1", "222, Tan Phu", ""),
 ];
 
 const AssetsPage = () => {
   const router = useRouter();
 
   const headCells: readonly HeadCell[] = [
+    {
+      id: "no",
+      numeric: false,
+      disablePadding: false,
+      label: "No.",
+    },
     {
       id: "id",
       numeric: false,
@@ -91,7 +100,7 @@ const AssetsPage = () => {
   ];
 
   return (
-    <div className="assets-page">
+    <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
       <div className="assets-page__header">
         <div className="assets-page__header__title">Warehouse</div>
         <div className="assets-page__header__group">
@@ -143,6 +152,14 @@ const AssetsPage = () => {
                     key={row.id}
                     sx={{ cursor: "pointer" }}
                   >
+                    <TableCell
+                      component="th"
+                      align="center"
+                      scope="row"
+                      padding="none"
+                    >
+                      {row.no}
+                    </TableCell>
                     <TableCell component="th" scope="row" padding="none">
                       {/* <Link className="link-url-table" href="/AssetDetail">
                         {row.id}

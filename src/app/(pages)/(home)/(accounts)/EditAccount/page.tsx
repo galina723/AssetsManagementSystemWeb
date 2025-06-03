@@ -67,7 +67,7 @@ const EditAccountPage = () => {
 
       <div
         className="assets-page__container"
-        style={{ height: "calc(100vh - (64px + 24px + 64px + 24px))" }}
+        style={{ height: "calc(100vh - (64px + 24px + 64px + 24px + 64px))" }}
       >
         <div className="assets-page__container__group">
           <span className="assets-page__container__group--label">
@@ -106,10 +106,7 @@ const EditAccountPage = () => {
           </span>
           <div className="date-picker">
             <DemoContainer components={["DatePicker"]}>
-              <DatePicker
-                label="Basic date picker"
-                value={accountData.birthday}
-              />
+              <DatePicker label="Choose date" value={accountData.birthday} />
             </DemoContainer>
           </div>
         </div>

@@ -13,6 +13,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 
 interface Data {
+  no: number;
   id: string;
   name: string;
   unit: string;
@@ -28,6 +29,7 @@ interface HeadCell {
 }
 
 function createData(
+  no: number,
   id: string,
   name: string,
   unit: string,
@@ -35,6 +37,7 @@ function createData(
   note: string
 ): Data {
   return {
+    no,
     id,
     name,
     unit,
@@ -45,6 +48,7 @@ function createData(
 
 const rows = [
   createData(
+    1,
     "RQ1",
     "Change laptop Dell to warehouse",
     "Nguyen Van A",
@@ -52,6 +56,7 @@ const rows = [
     "20/10/2024"
   ),
   createData(
+    2,
     "RQ2",
     "Liquidation PC intel 7250H",
     "Nguyen Tran Hoang A",
@@ -59,6 +64,7 @@ const rows = [
     "30/07/2025"
   ),
   createData(
+    3,
     "RQ3",
     "Change laptop HP 125U to warehouse",
     "Nguyen Thi C",
@@ -69,6 +75,12 @@ const rows = [
 
 const RequestsPage = () => {
   const headCells: readonly HeadCell[] = [
+    {
+      id: "no",
+      numeric: false,
+      disablePadding: false,
+      label: "No.",
+    },
     {
       id: "id",
       numeric: false,
@@ -103,7 +115,7 @@ const RequestsPage = () => {
   const router = useRouter();
 
   return (
-    <div className="assets-page">
+    <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
       <div className="assets-page__header">
         <div className="assets-page__header__title">Requests</div>
         {/* <div className="assets-page__header__group">
@@ -156,6 +168,14 @@ const RequestsPage = () => {
                     key={row.id}
                     sx={{ cursor: "pointer" }}
                   >
+                    <TableCell
+                      component="th"
+                      align="center"
+                      scope="row"
+                      padding="none"
+                    >
+                      {row.no}
+                    </TableCell>
                     <TableCell component="th" scope="row" padding="none">
                       {row.id}
                     </TableCell>

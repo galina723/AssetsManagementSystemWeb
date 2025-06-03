@@ -18,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 interface Data {
+  no: number;
   id: string;
   name: string;
   unit: string;
@@ -33,6 +34,7 @@ interface HeadCell {
 }
 
 function createData(
+  no: number,
   id: string,
   name: string,
   unit: string,
@@ -40,6 +42,7 @@ function createData(
   note: string
 ): Data {
   return {
+    no,
     id,
     name,
     unit,
@@ -49,15 +52,21 @@ function createData(
 }
 
 const rows = [
-  createData("Ad1", "Laptop Dell", "1", "Using", ""),
-  createData("Ad2", "iMac M4", "8", "Using", ""),
-  createData("Ad3", "Macbook Pro", "1", "Fixing", ""),
+  createData(1, "Ad1", "Laptop Dell", "1", "Using", ""),
+  createData(2, "Ad2", "iMac M4", "8", "Using", ""),
+  createData(3, "Ad3", "Macbook Pro", "1", "Fixing", ""),
 ];
 
 const AssetsPage = () => {
   const router = useRouter();
 
   const headCells: readonly HeadCell[] = [
+    {
+      id: "no",
+      numeric: false,
+      disablePadding: false,
+      label: "No.",
+    },
     {
       id: "id",
       numeric: false,
@@ -91,7 +100,7 @@ const AssetsPage = () => {
   ];
 
   return (
-    <div className="assets-page">
+    <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
       <div className="assets-page__header">
         <div className="assets-page__header__title">Assets</div>
         <div className="assets-page__header__group">
@@ -143,6 +152,15 @@ const AssetsPage = () => {
                     key={row.id}
                     sx={{ cursor: "pointer" }}
                   >
+                    <TableCell
+                      onClick={() => router.push("/DetailAsset")}
+                      component="th"
+                      scope="row"
+                      padding="none"
+                      align="center"
+                    >
+                      {row.no}
+                    </TableCell>
                     <TableCell
                       onClick={() => router.push("/DetailAsset")}
                       component="th"

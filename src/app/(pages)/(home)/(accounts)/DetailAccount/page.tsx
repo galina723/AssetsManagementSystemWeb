@@ -46,7 +46,7 @@ const DetailAccountPage = () => {
         className="assets-page__container"
         style={{
           padding: 16,
-          height: "calc(100vh - (64px + 24px + 64px + 24px))",
+          height: "calc(100vh - (64px + 24px + 64px + 24px + 64px))",
         }}
       >
         {renderItem("Full Name", mockAccount.fullName)}

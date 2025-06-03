@@ -18,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 interface Data {
+  no: number;
   id: string;
   name: string;
   unit: string;
@@ -33,6 +34,7 @@ interface HeadCell {
 }
 
 function createData(
+  no: number,
   id: string,
   name: string,
   unit: string,
@@ -40,6 +42,7 @@ function createData(
   note: string
 ): Data {
   return {
+    no,
     id,
     name,
     unit,
@@ -49,9 +52,9 @@ function createData(
 }
 
 const rows = [
-  createData("NV1", "Nguyen Van A", "Nhan vien", "Phong nhan su", ""),
-  createData("NV2", "Nguyen Thi C", "Ki thuat vien", "Phong sua chua", ""),
-  createData("WH3", "Tran Thi B", "Quan ly kho", "Phong kho", ""),
+  createData(1, "NV1", "Nguyen Van A", "Nhan vien", "Phong nhan su", ""),
+  createData(2, "NV2", "Nguyen Thi C", "Ki thuat vien", "Phong sua chua", ""),
+  createData(3, "WH3", "Tran Thi B", "Quan ly kho", "Phong kho", ""),
 ];
 
 const AccountsPage = () => {
@@ -59,10 +62,16 @@ const AccountsPage = () => {
 
   const headCells: readonly HeadCell[] = [
     {
+      id: "no",
+      numeric: false,
+      disablePadding: false,
+      label: "No.",
+    },
+    {
       id: "id",
       numeric: false,
       disablePadding: false,
-      label: "Account id",
+      label: "Staff id",
     },
     {
       id: "name",
@@ -91,7 +100,7 @@ const AccountsPage = () => {
   ];
 
   return (
-    <div className="assets-page">
+    <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
       <div className="assets-page__header">
         <div className="assets-page__header__title">Account</div>
         <div className="assets-page__header__group">
@@ -143,6 +152,15 @@ const AccountsPage = () => {
                     key={row.id}
                     sx={{ cursor: "pointer" }}
                   >
+                    <TableCell
+                      onClick={() => router.push("/DetailAccount")}
+                      component="th"
+                      scope="row"
+                      padding="none"
+                      align="center"
+                    >
+                      {row.no}
+                    </TableCell>
                     <TableCell
                       onClick={() => router.push("/DetailAccount")}
                       component="th"
