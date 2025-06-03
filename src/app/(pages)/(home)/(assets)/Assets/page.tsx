@@ -11,11 +11,13 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from "next/navigation";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import { useDispatch } from "react-redux";
+import { addSidebar } from "@/redux/reducers/sidebarReducer";
 
 interface Data {
   no: number;
@@ -59,6 +61,7 @@ const rows = [
 
 const AssetsPage = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const headCells: readonly HeadCell[] = [
     {
@@ -98,6 +101,10 @@ const AssetsPage = () => {
       label: "Note",
     },
   ];
+
+  useEffect(() => {
+    dispatch(addSidebar("asset"));
+  }, [dispatch]);
 
   return (
     <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>

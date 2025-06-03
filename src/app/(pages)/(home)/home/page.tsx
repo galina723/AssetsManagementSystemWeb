@@ -1,4 +1,7 @@
+"use client";
+
 import CountItem from "@/components/Home/CountItem";
+import { addSidebar } from "@/redux/reducers/sidebarReducer";
 import {
   TableContainer,
   Paper,
@@ -10,6 +13,8 @@ import {
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 function createData(
   name: string,
@@ -29,6 +34,12 @@ const HomePage = () => {
     createData("Laptop Dell", 1, "Piece", "Using", ""),
     createData("Projector", 1, "Piece", "Warehouse", ""),
   ];
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(addSidebar("home"));
+  }, [dispatch]);
 
   return (
     <div className="home-page">

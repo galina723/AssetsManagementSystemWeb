@@ -1,5 +1,6 @@
 "use client";
 
+import { addSidebar } from "@/redux/reducers/sidebarReducer";
 import {
   Table,
   TableBody,
@@ -10,7 +11,8 @@ import {
   TableRow,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 interface Data {
   no: number;
@@ -114,6 +116,12 @@ const WorkPage = () => {
   ];
 
   const router = useRouter();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(addSidebar("work"));
+  }, [dispatch]);
 
   return (
     <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
