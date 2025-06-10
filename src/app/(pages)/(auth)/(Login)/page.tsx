@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Button, Input } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { addAuth } from "@/redux/reducers/auth_reducer";
+import { addAuth } from "@/redux/reducers/authReducer";
 import Link from "next/link";
 
 const LoginPage = () => {

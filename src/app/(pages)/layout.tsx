@@ -1,6 +1,6 @@
 "use client";
 
-import { authSelector } from "@/redux/reducers/auth_reducer";
+import { authSelector } from "@/redux/reducers/authReducer";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import LoginPage from "./(auth)/(Login)/page";

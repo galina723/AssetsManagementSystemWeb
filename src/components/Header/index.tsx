@@ -4,7 +4,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Button from "@mui/material/Button";
 import { Menu, MenuItem } from "@mui/material";
-import { addAuth } from "@/redux/reducers/auth_reducer";
+import { addAuth } from "@/redux/reducers/authReducer";
 import { useDispatch } from "react-redux";
 
 interface Props {

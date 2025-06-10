@@ -9,8 +9,10 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { addSidebar } from "@/redux/reducers/sidebarReducer";
 
 interface Data {
   no: number;
@@ -113,6 +115,11 @@ const RequestsPage = () => {
     },
   ];
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(addSidebar("request"));
+  }, [dispatch]);
 
   return (
     <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>

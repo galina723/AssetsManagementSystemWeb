@@ -31,9 +31,18 @@
     flex-direction: row;
     gap: 8px;
     padding: 0 24px 0 24px;
+    &--active {
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
   }
 
   &__item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+  }
+
+  &--active {
     background: rgba(255, 255, 255, 0.1);
     cursor: pointer;
   }
