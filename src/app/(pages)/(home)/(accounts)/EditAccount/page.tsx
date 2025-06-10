@@ -21,7 +21,7 @@ const EditAccountPage = () => {
   ];
 
   const departmentData: DynamicModel[] = [
-    { name: "R&D department", value: "R&D department" },
+    { name: "Lab department", value: "Lab department" },
     { name: "HR department", value: "HR department" },
     { name: "Fixing department", value: "Fixing department" },
   ];

@@ -15,7 +15,7 @@ const EditAssetsPage = () => {
   const router = useRouter();
 
   const departmentData: DynamicModel[] = [
-    { name: "R&D department", value: "R&D department" },
+    { name: "Lab department", value: "Lab department" },
     { name: "HR department", value: "HR department" },
     { name: "Fixing department", value: "Fixing department" },
   ];
@@ -36,12 +36,12 @@ const EditAssetsPage = () => {
     code: "PC-223",
     currency: "VND",
     user: "Nguyen Van A",
-    department: "R&D department",
+    department: "Lab department",
     dateOfPurchase: dayjs("2024-06-01"),
     quantity: "10",
     price: "12000000",
     unit: "VND",
-    note: "Used in R&D lab",
+    note: "Used in Lab lab",
     purpose: "Development workstation",
     guarantee: "12 months",
     supplier: "FPT Shop",

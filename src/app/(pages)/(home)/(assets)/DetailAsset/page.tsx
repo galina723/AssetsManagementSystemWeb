@@ -13,7 +13,7 @@ const DetailAssetPage = () => {
     code: "XPS15-001",
     currency: "VND",
     user: "Nguyen Van A",
-    department: "R&D department",
+    department: "Lab department",
     purchaseDate: "2023-08-15",
     quantity: 5,
     price: 35000000,

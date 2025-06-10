@@ -15,8 +15,8 @@ const CreateAssetsPage = () => {
 
   const departmentData: DynamicModel[] = [
     {
-      name: "R&D department",
-      value: "R&D department",
+      name: "Lab department",
+      value: "Lab department",
     },
     {
       name: "HR department",

@@ -157,10 +157,16 @@ const AssetsPage = () => {
                       align="center"
                       scope="row"
                       padding="none"
+                      onClick={() => router.push("/AssetDetail")}
                     >
                       {row.no}
                     </TableCell>
-                    <TableCell component="th" scope="row" padding="none">
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      padding="none"
+                      onClick={() => router.push("/AssetDetail")}
+                    >
                       {/* <Link className="link-url-table" href="/AssetDetail">
                         {row.id}
                       </Link> */}

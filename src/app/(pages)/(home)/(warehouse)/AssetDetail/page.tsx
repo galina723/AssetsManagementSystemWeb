@@ -92,7 +92,7 @@ const AssetsPage = () => {
   ];
 
   return (
-    <div className="assets-page">
+    <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
       <div className="assets-page__header">
         <div className="assets-page__header__title assets-page__header__title__group">
           <IconButton onClick={() => router.push("/Warehouse")}>
