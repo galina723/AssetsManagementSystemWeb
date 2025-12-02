@@ -13,10 +13,10 @@ import {
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
-function createData(
+function createAssetData(
   name: string,
   total: number,
   unit: string,
@@ -27,35 +27,51 @@ function createData(
 }
 
 const HomePage = () => {
-  const rows = [
-    createData("Paper", 15, "Piece", "Using", ""),
-    createData("Macbook Pro", 1, "Piece", "Fixing", ""),
-    createData("iMac M4", 15, "Piece", "Using", ""),
-    createData("Laptop Dell", 1, "Piece", "Using", ""),
-    createData("Projector", 1, "Piece", "Warehouse", ""),
-  ];
-
   const dispatch = useDispatch();
+
+  // ⭐ LẤY USER TỪ LOCAL STORAGE
+  const [user, setUser] = useState<any>(null);
+
+  const assetRows = [
+    createAssetData("Paper", 15, "Piece", "Using", ""),
+    createAssetData("Macbook Pro", 1, "Piece", "Fixing", ""),
+    createAssetData("iMac M4", 15, "Piece", "Using", ""),
+    createAssetData("Laptop Dell", 1, "Piece", "Using", ""),
+    createAssetData("Projector", 1, "Piece", "Warehouse", ""),
+  ];
 
   useEffect(() => {
     dispatch(addSidebar("home"));
+
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData)); // ⭐ Lưu vào state
+    }
   }, [dispatch]);
 
   return (
     <div className="home-page">
+      {/* ⭐ HIỂN THỊ TÊN NGƯỜI DÙNG */}
+      {user && (
+        <div style={{ marginBottom: 20, fontSize: 20, fontWeight: 600 }}>
+          Welcome back, {user.fullName}
+        </div>
+      )}
+
       <div className="home-page__section-1">
-        <CountItem title="Assets" count={75} color="red" />
-        <CountItem title="Warehouse" count={30} color="green" />
-        <CountItem title="Using" count={60} color="blue" />
+        <CountItem title="Total Assets" count={75} color="red" />
+        <CountItem title="In Warehouse" count={30} color="green" />
+        <CountItem title="In Use" count={60} color="blue" />
         <CountItem title="Fixing" count={15} color="orange" />
       </div>
+
       <div className="home-page__section-2">
         <div className="home-page__section-2__selection-1">
           <div className="home-page__section-2__selection-1__title">
-            Assets data
+            Asset Chart
           </div>
           <BarChart
-            xAxis={[{ data: ["group A", "group B", "group C"] }]}
+            xAxis={[{ data: ["Group A", "Group B", "Group C"] }]}
             series={[
               { data: [4, 3, 5], color: "rgba(173, 216, 230, 0.7)" },
               { data: [1, 6, 3], color: "rgba(144, 238, 144, 0.7)" },
@@ -64,9 +80,10 @@ const HomePage = () => {
             height={300}
           />
         </div>
+
         <div className="home-page__section-2__selection-1 home-page__section-2__selection-2">
           <div className="home-page__section-2__selection-1__title">
-            Warehouse data
+            Warehouse Chart
           </div>
           <PieChart
             series={[
@@ -97,15 +114,17 @@ const HomePage = () => {
           />
         </div>
       </div>
+
       <div className="home-page__section-3">
         <div className="home-page__section-2__selection-1__title">
-          Assets data
+          Asset Table
         </div>
+
         <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <Table sx={{ minWidth: 650 }} aria-label="asset table">
             <TableHead>
               <TableRow>
-                <TableCell>Assets name</TableCell>
+                <TableCell>Asset Name</TableCell>
                 <TableCell align="right">Total</TableCell>
                 <TableCell align="right">Unit</TableCell>
                 <TableCell align="right">Status</TableCell>
@@ -113,14 +132,9 @@ const HomePage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow
-                  key={row.name}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {row.name}
-                  </TableCell>
+              {assetRows.map((row) => (
+                <TableRow key={row.name}>
+                  <TableCell>{row.name}</TableCell>
                   <TableCell align="right">{row.total}</TableCell>
                   <TableCell align="right">{row.unit}</TableCell>
                   <TableCell align="right">{row.status}</TableCell>
