@@ -1,0 +1,26 @@
+.home-count-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--white);
+  padding: 24px;
+  border-radius: 16px;
+  width: 100%;
+
+  &__title {
+    font-size: 16px;
+    color: var(--gray-text);
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+    &__number {
+      font-weight: 600;
+      font-size: 32px;
+    }
+  }
+}

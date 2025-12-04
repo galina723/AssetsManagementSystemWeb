@@ -1,0 +1,17 @@
+.dropdown {
+  border: 1px solid var(--gray-text);
+  border-radius: 4px;
+  width: 87%;
+  flex: 8;
+  &__box {
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.date-picker {
+  flex: 8;
+}

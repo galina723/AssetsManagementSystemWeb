@@ -1,0 +1,51 @@
+.assets-page {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: 16px;
+  background-color: var(--white);
+  gap: 24px;
+  &__container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: auto;
+    &__group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      &--label {
+        flex: 2;
+        color: gray;
+      }
+      &--input {
+        flex: 8;
+      }
+    }
+  }
+  &__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    &__title {
+      font-size: 24px;
+      font-weight: 600;
+      &__group {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+  }
+}
+
+.MuiInputBase-input {
+  padding: 4px !important;
+}
+
+.link-url-table {
+  text-decoration: none !important;
+}

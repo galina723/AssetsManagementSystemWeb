@@ -1,0 +1,49 @@
+.app-sidebar {
+  background: var(--primary);
+  height: 100vh;
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0 8px 0;
+  gap: 16px;
+}
+
+.app-sidebar__logo {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 64px;
+  color: var(--white);
+}
+
+.app-sidebar__menu {
+  display: flex;
+  flex-direction: column;
+
+  &__item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 50px;
+    color: var(--secondary);
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding: 0 24px 0 24px;
+    &--active {
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
+  }
+
+  &__item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+  }
+
+  &--active {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+  }
+}
