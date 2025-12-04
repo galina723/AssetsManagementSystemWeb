@@ -7,7 +7,6 @@ import Link from "next/link";
 import { AuthService } from "@/services/authService";
 import { useDispatch } from "react-redux";
 import { addAuth } from "@/redux/reducers/authReducer";
-import { UserModel } from "@/models/user/userModel";
 
 const LoginPage = () => {
   const dispatch = useDispatch();
@@ -49,25 +48,8 @@ const LoginPage = () => {
 
       // ⭐ Lưu Full User Info theo UserModel
       if (result.success && result.token && result.user) {
-        localStorage.setItem("token", result.token);
-
-        const user: UserModel = {
-          userID: result.user.userID,
-          email: result.user.email,
-          fullName: result.user.fullName,
-          avatar: result.user.avatar,
-          department: result.user.department,
-          position: result.user.position,
-          dateOfBirth: result.user.dateOfBirth,
-          phone: result.user.phone,
-          gender: result.user.gender,
-          username: result.user.username,
-          role: result.user.role,
-        };
-
-        localStorage.setItem("user", JSON.stringify(user));
-
         dispatch(addAuth(true));
+        localStorage.setItem("auth", "true");
         window.location.href = "/home";
       } else {
         alert(result.message || "Invalid credentials");

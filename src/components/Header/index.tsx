@@ -49,9 +49,7 @@ const Header: FC<Props> = (props) => {
             variant="outlined"
             startIcon={<AccountCircleIcon />}
             onClick={handleClick}
-          >
-            Nguyen Van A
-          </Button>
+          ></Button>
           <Menu
             id="basic-menu"
             anchorEl={anchorEl}

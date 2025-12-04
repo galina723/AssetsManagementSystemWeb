@@ -1,4 +1,4 @@
-import { User } from "../user/userModel";
+import { User } from "../user/UserModel";
 
 export interface LoginRequest {
   username: string;

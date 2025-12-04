@@ -54,7 +54,7 @@ const HomePage = () => {
       {/* ⭐ HIỂN THỊ TÊN NGƯỜI DÙNG */}
       {user && (
         <div style={{ marginBottom: 20, fontSize: 20, fontWeight: 600 }}>
-          Welcome back, {user.fullName}
+          Welcome back, {user.name}
         </div>
       )}
 
