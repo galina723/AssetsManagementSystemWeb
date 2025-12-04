@@ -30,7 +30,7 @@ const HomePage = () => {
   const dispatch = useDispatch();
 
   // ⭐ LẤY USER TỪ LOCAL STORAGE
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<unknown>(null);
 
   const assetRows = [
     createAssetData("Paper", 15, "Piece", "Using", ""),

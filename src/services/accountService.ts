@@ -1,5 +1,3 @@
-import { AuthModel, LoginRequest } from "../models/auth/LoginModel";
-import axios from "axios";
 import { UserModel } from "../models/user/UserModel";
 import { connector } from "@/helper/service/service";
 

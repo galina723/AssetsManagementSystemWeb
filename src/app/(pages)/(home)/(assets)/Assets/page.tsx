@@ -8,16 +8,17 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from "next/navigation";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch } from "react-redux";
 import { addSidebar } from "@/redux/reducers/sidebarReducer";
+import { AssetService } from "@/services/assetService";
+import { AssetModel } from "@/models/asset/AssetModel";
 
 interface Data {
   no: number;
@@ -35,33 +36,25 @@ interface HeadCell {
   numeric: boolean;
 }
 
-function createData(
-  no: number,
-  id: string,
-  name: string,
-  unit: string,
-  status: string,
-  note: string
-): Data {
-  return {
-    no,
-    id,
-    name,
-    unit,
-    status,
-    note,
-  };
-}
-
-const rows = [
-  createData(1, "Ad1", "Laptop Dell", "1", "Using", ""),
-  createData(2, "Ad2", "iMac M4", "8", "Using", ""),
-  createData(3, "Ad3", "Macbook Pro", "1", "Fixing", ""),
-];
-
 const AssetsPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const [listAssetData, setListAssetData] = useState<AssetModel[]>();
+
+  useEffect(() => {
+    getListAssetData();
+  }, []);
+
+  const getListAssetData = async () => {
+    const asset = await AssetService.getAllAsset();
+
+    console.log(asset);
+
+    if (asset !== "fail") {
+      setListAssetData(asset);
+    }
+  };
 
   const headCells: readonly HeadCell[] = [
     {
@@ -150,84 +143,76 @@ const AssetsPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => {
-                return (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    tabIndex={-1}
-                    key={row.id}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell
-                      onClick={() => router.push("/DetailAsset")}
-                      component="th"
-                      scope="row"
-                      padding="none"
-                      align="center"
+              {listAssetData &&
+                listAssetData.map((row, i) => {
+                  return (
+                    <TableRow
+                      hover
+                      role="checkbox"
+                      tabIndex={-1}
+                      key={row.assetID}
+                      sx={{ cursor: "pointer" }}
                     >
-                      {row.no}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAsset")}
-                      component="th"
-                      scope="row"
-                      padding="none"
-                    >
-                      {row.id}
-                    </TableCell>
-                    <TableCell
-                      align="left"
-                      onClick={() => router.push("/DetailAsset")}
-                    >
-                      {row.name}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAsset")}
-                      align="center"
-                    >
-                      {row.unit}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAsset")}
-                      align="center"
-                    >
-                      {row.status}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAsset")}
-                      align="center"
-                    >
-                      {row.note}
-                    </TableCell>
-                    <TableCell align="center">
-                      <div>
-                        <IconButton
-                          color="success"
-                          onClick={() => router.push("EditAssets")}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton color="error">
-                          <DeleteIcon />
-                        </IconButton>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      <TableCell
+                        onClick={() => router.push("/DetailAsset")}
+                        component="th"
+                        scope="row"
+                        padding="none"
+                        align="center"
+                      >
+                        {i + 1}
+                      </TableCell>
+                      <TableCell
+                        onClick={() => router.push("/DetailAsset")}
+                        component="th"
+                        scope="row"
+                        padding="none"
+                      >
+                        {row.assetID}
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        onClick={() => router.push("/DetailAsset")}
+                      >
+                        {row.name}
+                      </TableCell>
+                      <TableCell
+                        onClick={() => router.push("/DetailAsset")}
+                        align="center"
+                      >
+                        {row.unit}
+                      </TableCell>
+                      <TableCell
+                        onClick={() => router.push("/DetailAsset")}
+                        align="center"
+                      >
+                        {row.status}
+                      </TableCell>
+                      <TableCell
+                        onClick={() => router.push("/DetailAsset")}
+                        align="center"
+                      >
+                        {row.note}
+                      </TableCell>
+                      <TableCell align="center">
+                        <div>
+                          <IconButton
+                            color="success"
+                            onClick={() => router.push("EditAssets")}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton color="error">
+                            <DeleteIcon />
+                          </IconButton>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={5}
-          page={1}
-          onPageChange={() => {}}
-          onRowsPerPageChange={() => {}}
-        />
       </div>
     </div>
   );

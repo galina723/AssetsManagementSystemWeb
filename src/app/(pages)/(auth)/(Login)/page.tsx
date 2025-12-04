@@ -22,6 +22,7 @@ const LoginPage = () => {
 
   const checkLogin = () => {
     const getToken = localStorage.getItem("token");
+
     if (!getToken) {
       setLoading(false);
       return;

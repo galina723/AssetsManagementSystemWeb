@@ -27,6 +27,8 @@ const Header: FC<Props> = (props) => {
 
   const handleLogout = () => {
     localStorage.setItem("auth", "false");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     dispatch(addAuth(false));
     window.location.reload();
     setAnchorEl(null);
@@ -49,7 +51,10 @@ const Header: FC<Props> = (props) => {
             variant="outlined"
             startIcon={<AccountCircleIcon />}
             onClick={handleClick}
-          ></Button>
+          >
+            {localStorage.getItem("user") &&
+              JSON.parse(localStorage.getItem("user")!).fullName}
+          </Button>
           <Menu
             id="basic-menu"
             anchorEl={anchorEl}

@@ -4,10 +4,10 @@
 //   password: string;
 // }
 
-import {User} from '../user/UserModel';
+import { User as UserT } from "../user/UserModel";
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -53,7 +53,7 @@ export interface TestConnectionResult {
   success: boolean;
   status?: number;
   message?: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface LoginResult {
@@ -72,7 +72,7 @@ export interface AssetsResult {
 export interface AuthModel {
   success: boolean;
   token: string;
-  user: User;
+  user: UserT;
   expiresIn: number;
   message: string;
 }

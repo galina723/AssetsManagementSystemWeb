@@ -1,6 +1,4 @@
-import { AuthModel, LoginRequest } from "../models/auth/LoginModel";
-import axios from "axios";
-import { AddWorkModel } from "../models/work/workModel";
+import { AddWorkModel, WorkModel } from "../models/work/workModel";
 import { connector } from "@/helper/service/service";
 
 export class WorkService {
@@ -8,7 +6,7 @@ export class WorkService {
     const res = await connector.get(`/work/get-work-createdList`);
 
     if (res.status === 200) {
-      return res.data.data as any[];
+      return res.data.data as WorkModel[];
     } else {
       return "fail";
     }
@@ -18,7 +16,7 @@ export class WorkService {
     const res = await connector.get(`/work/get-work-created/${id}`);
 
     if (res.status === 200) {
-      return res.data.data as any;
+      return res.data.data as unknown;
     } else {
       return "fail";
     }
@@ -28,7 +26,7 @@ export class WorkService {
     const res = await connector.get(`/work/${id}`);
 
     if (res.status === 200) {
-      return res.data.data as any;
+      return res.data.data as unknown;
     } else {
       return "fail";
     }

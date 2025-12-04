@@ -1,4 +1,4 @@
-import { AuthModel, LoginRequest } from "../models/auth/LoginModel";
+import { LoginRequest } from "../models/auth/LoginModel";
 import axios from "axios";
 import { SERVICE_API_URL } from "./service";
 

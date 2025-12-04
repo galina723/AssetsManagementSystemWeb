@@ -1,17 +1,18 @@
 "use client";
 
+import { WorkModel } from "@/models/work/workModel";
 import { addSidebar } from "@/redux/reducers/sidebarReducer";
+import { WorkService } from "@/services/workService";
 import {
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
 interface Data {
@@ -30,52 +31,21 @@ interface HeadCell {
   numeric: boolean;
 }
 
-function createData(
-  no: number,
-  id: string,
-  name: string,
-  unit: string,
-  status: string,
-  note: string
-): Data {
-  return {
-    no,
-    id,
-    name,
-    unit,
-    status,
-    note,
-  };
-}
-
-const rows = [
-  createData(
-    1,
-    "Wk1",
-    "Fix Macbook pro",
-    "Nguyen Van A",
-    "Processing",
-    "20/10/2024"
-  ),
-  createData(
-    2,
-    "Wk2",
-    "Maintenance Air cool",
-    "Nguyen Tran Hoang A",
-    "Done",
-    "30/07/2025"
-  ),
-  createData(
-    3,
-    "Wk3",
-    "Fixing laptop Dell",
-    "Nguyen Thi C",
-    "Processing",
-    "25/05/2025"
-  ),
-];
-
 const WorkPage = () => {
+  const [listWorkData, setListWorkData] = useState<WorkModel[]>([]);
+
+  useEffect(() => {
+    getListWorkData();
+  }, []);
+
+  const getListWorkData = async () => {
+    const work = await WorkService.getAllWork();
+    console.log("work", work);
+    if (work !== "fail") {
+      setListWorkData(work);
+    }
+  };
+
   const headCells: readonly HeadCell[] = [
     {
       id: "no",
@@ -100,18 +70,6 @@ const WorkPage = () => {
       numeric: false,
       disablePadding: false,
       label: "Handler",
-    },
-    {
-      id: "status",
-      numeric: false,
-      disablePadding: false,
-      label: "Status",
-    },
-    {
-      id: "note",
-      numeric: false,
-      disablePadding: false,
-      label: "Created date",
     },
   ];
 
@@ -167,14 +125,14 @@ const WorkPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => {
+              {listWorkData.map((row: WorkModel, i: number) => {
                 return (
                   <TableRow
                     hover
                     onClick={() => router.push("/DetailWork")}
                     role="checkbox"
                     tabIndex={-1}
-                    key={row.id}
+                    key={row.workID}
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell
@@ -183,15 +141,15 @@ const WorkPage = () => {
                       scope="row"
                       padding="none"
                     >
-                      {row.no}
+                      {i + 1}
                     </TableCell>
                     <TableCell component="th" scope="row" padding="none">
-                      {row.id}
+                      {row.workID}
                     </TableCell>
                     <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="center">{row.unit}</TableCell>
+                    <TableCell align="center">{row.assetID}</TableCell>
                     <TableCell align="center">{row.status}</TableCell>
-                    <TableCell align="center">{row.note}</TableCell>
+                    <TableCell align="center">{row.assignments}</TableCell>
                     {/* <TableCell align="center">
                       <div>
                         <IconButton
@@ -211,15 +169,6 @@ const WorkPage = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={5}
-          page={1}
-          onPageChange={() => {}}
-          onRowsPerPageChange={() => {}}
-        />
       </div>
     </div>
   );

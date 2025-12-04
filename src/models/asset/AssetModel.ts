@@ -1,18 +1,17 @@
-import {DynamicValue} from '../form/DynamicValue';
-import {UserModel} from '../user/UserModel';
+import { DynamicValue } from "../form/DynamicValue";
 
 export const AssetStatusOptions: DynamicValue[] = [
-  {label: 'Normal', value: 0},
-  {label: 'In use', value: 1},
-  {label: 'Broken', value: 2},
-  {label: 'Recall', value: 3},
-  {label: 'In repair', value: 4},
-  {label: 'Lost', value: 5},
+  { label: "Normal", value: 0 },
+  { label: "In use", value: 1 },
+  { label: "Broken", value: 2 },
+  { label: "Recall", value: 3 },
+  { label: "In repair", value: 4 },
+  { label: "Lost", value: 5 },
 ];
 
 export enum CurrencyEnum {
-  VND = 'VND',
-  USD = 'USD',
+  VND = "VND",
+  USD = "USD",
 }
 
 export interface AssetModel {
@@ -61,7 +60,7 @@ export interface AssetDetailModel {
   latitude: number;
   longitude: number;
   isInWarehouse: boolean;
-  files: any[];
+  files: unknown[];
 }
 
 export interface AddAssetModel {

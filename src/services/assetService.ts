@@ -1,96 +1,105 @@
-// import { connector } from "@/helper/service/service";
+import axios from "axios";
+import {
+  AddAssetModel,
+  AssetDetailModel,
+  AssignAssetModel,
+  UpdateAssetModel,
+} from "../models/asset/AssetModel";
+import { connector, SERVICE_API_URL } from "./service";
 
-// export class AssetService {
-//   static async getAllAsset() {
-//     const res = await connector.get(`/asset`);
+export class AssetService {
+  static async getAllAsset() {
+    const token = localStorage.getItem("token");
 
-//     if (res.status === 200) {
-//       return res.data.data as AssetModel[];
-//     } else {
-//       return "fail";
-//     }
-//   }
+    const res = await axios.get(`${SERVICE_API_URL}/asset`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-//   // static async getAsset(id: number) {
-//   //   const res = await connector.get(`/asset/${id}`);
+    return res.status === 200 ? res.data.data : "fail";
+  }
 
-//   //   if (res.status === 200) {
-//   //     return res.data.data as AssetDetailModel;
-//   //   } else {
-//   //     return "fail";
-//   //   }
-//   // }
+  static async getAsset(id: number) {
+    const res = await connector.get(`/asset/${id}`);
 
-//   // static async addAsset(data: AddAssetModel) {
-//   //   const res = await connector.post("/asset", data);
+    if (res.status === 200) {
+      return res.data.data as AssetDetailModel;
+    } else {
+      return "fail";
+    }
+  }
 
-//   //   if (res.status === 200) {
-//   //     return res;
-//   //   }
+  static async addAsset(data: AddAssetModel) {
+    const res = await connector.post("/asset", data);
 
-//   //   return "fail";
-//   // }
+    if (res.status === 200) {
+      return res;
+    }
 
-//   // static async updateAsset(data: UpdateAssetModel, id: number) {
-//   //   const res = await connector.put(`/asset/${id}`, data);
+    return "fail";
+  }
 
-//   //   if (res.status === 200) {
-//   //     return res;
-//   //   }
+  static async updateAsset(data: UpdateAssetModel, id: number) {
+    const res = await connector.put(`/asset/${id}`, data);
 
-//   //   return "fail";
-//   // }
+    if (res.status === 200) {
+      return res;
+    }
 
-//   static async deleteAsset(id: number) {
-//     const res = await connector.delete(`/asset/${id}`);
+    return "fail";
+  }
 
-//     if (res.status === 200) {
-//       return res;
-//     }
+  static async deleteAsset(id: number) {
+    const res = await connector.delete(`/asset/${id}`);
 
-//     return "fail";
-//   }
+    if (res.status === 200) {
+      return res;
+    }
 
-//   // static async addAssetFile(id: number, attachment: DocumentPickerResponse) {
-//   //   const data = new FormData();
-//   //   data.append("file", attachment as any);
+    return "fail";
+  }
 
-//   //   const res = await connectorFile.post(`/asset/${id}/files`, data);
+  //   static async addAssetFile(id: number, attachment: DocumentPickerResponse) {
+  //     const data = new FormData();
+  //     data.append("file", attachment as any);
 
-//   //   if (res.status === 200) {
-//   //     return res;
-//   //   }
+  //     const res = await connectorFile.post(`/asset/${id}/files`, data);
 
-//   //   return "fail";
-//   // }
+  //     if (res.status === 200) {
+  //       return res;
+  //     }
 
-//   static async assignAsset(data: AssignAssetModel) {
-//     const res = await connector.post("/asset/assign", data);
+  //     return "fail";
+  //   }
 
-//     if (res.status === 200) {
-//       return res;
-//     }
+  static async assignAsset(data: AssignAssetModel) {
+    const res = await connector.post("/asset/assign", data);
 
-//     return "fail";
-//   }
+    if (res.status === 200) {
+      return res;
+    }
 
-//   // static async updateAsset(data: AssetModel, id: number) {
-//   //   const res = await connector.put(`/asset/${id}`, data);
+    return "fail";
+  }
 
-//   //   if (res.status === 200) {
-//   //     return res;
-//   //   }
+  // static async updateAsset(data: AssetModel, id: number) {
+  //   const res = await connector.put(`/asset/${id}`, data);
 
-//   //   return 'fail';
-//   // }
+  //   if (res.status === 200) {
+  //     return res;
+  //   }
 
-//   // static async deleteAsset(id: number) {
-//   //   const res = await connector.delete(`/asset/${id}`);
+  //   return 'fail';
+  // }
 
-//   //   if (res.status === 200) {
-//   //     return res;
-//   //   }
+  // static async deleteAsset(id: number) {
+  //   const res = await connector.delete(`/asset/${id}`);
 
-//   //   return 'fail';
-//   // }
-// }
+  //   if (res.status === 200) {
+  //     return res;
+  //   }
+
+  //   return 'fail';
+  // }
+}
