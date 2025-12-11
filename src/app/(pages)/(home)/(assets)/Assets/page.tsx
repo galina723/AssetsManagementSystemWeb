@@ -1,220 +1,205 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import {
-  Button,
-  IconButton,
   Table,
+  TableRow,
+  TableHead,
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
-  TableRow,
+  Paper,
+  IconButton,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
-import { useRouter } from "next/navigation";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import { useDispatch } from "react-redux";
-import { addSidebar } from "@/redux/reducers/sidebarReducer";
-import { AssetService } from "@/services/assetService";
-import { AssetModel } from "@/models/asset/AssetModel";
 
-interface Data {
-  no: number;
-  id: string;
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
+interface AssetModel {
+  assetID: number;
   name: string;
+  code: string;
+  owner: string;
+  position: string;
+  price: number;
   unit: string;
   status: string;
-  note: string;
-}
-
-interface HeadCell {
-  disablePadding: boolean;
-  id: keyof Data;
-  label: string;
-  numeric: boolean;
 }
 
 const AssetsPage = () => {
   const router = useRouter();
-  const dispatch = useDispatch();
+  const [assets, setAssets] = useState<AssetModel[]>([]);
 
-  const [listAssetData, setListAssetData] = useState<AssetModel[]>();
+  // Modal state
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  useEffect(() => {
-    getListAssetData();
-  }, []);
+  // Load assets
+  const fetchAssets = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-  const getListAssetData = async () => {
-    const asset = await AssetService.getAllAsset();
+      const res = await axios.get(
+        "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
 
-    console.log(asset);
-
-    if (asset !== "fail") {
-      setListAssetData(asset);
+      setAssets(res.data.data || []);
+    } catch (err) {
+      console.log(err);
+      alert("Cannot load assets");
     }
   };
 
-  const headCells: readonly HeadCell[] = [
-    {
-      id: "no",
-      numeric: false,
-      disablePadding: false,
-      label: "No.",
-    },
-    {
-      id: "id",
-      numeric: false,
-      disablePadding: false,
-      label: "Asset id",
-    },
-    {
-      id: "name",
-      numeric: false,
-      disablePadding: false,
-      label: "Name",
-    },
-    {
-      id: "unit",
-      numeric: false,
-      disablePadding: false,
-      label: "Unit",
-    },
-    {
-      id: "status",
-      numeric: false,
-      disablePadding: false,
-      label: "Status",
-    },
-    {
-      id: "note",
-      numeric: false,
-      disablePadding: false,
-      label: "Note",
-    },
-  ];
-
   useEffect(() => {
-    dispatch(addSidebar("asset"));
-  }, [dispatch]);
+    fetchAssets();
+  }, []);
+
+  // Open confirm modal
+  const handleOpenConfirm = (id: number) => {
+    setSelectedId(id);
+    setOpenConfirm(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+    setSelectedId(null);
+  };
+
+  // DELETE
+  const handleDelete = async () => {
+    if (!selectedId) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(
+        `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset/${selectedId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
+      alert("Asset deleted");
+      handleCloseConfirm();
+      fetchAssets();
+    } catch (err) {
+      console.log(err);
+      alert("Delete failed");
+    }
+  };
+
+  // Edit
+  const handleEdit = (id: number) => {
+    router.push(`/EditAsset?id=${id}`);
+  };
 
   return (
-    <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
-      <div className="assets-page__header">
-        <div className="assets-page__header__title">Assets</div>
-        <div className="assets-page__header__group">
-          <Button
-            startIcon={<AddIcon />}
-            variant="contained"
-            onClick={() => router.push("CreateAssets")}
-          >
-            Add asset
-          </Button>
-        </div>
-      </div>
-
-      <div id="table-data" className="assets-page__container">
-        <TableContainer
-          sx={{
-            maxHeight:
-              "calc(100vh - (64px + 24px + 37px + 24px + 24px + 52px))",
+    <>
+      <div style={{ padding: "24px" }}>
+        {/* HEADER */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "16px",
           }}
         >
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={"medium"}
+          <h2 style={{ margin: 0 }}>Assets List</h2>
+
+          {/* ADD ASSET BUTTON */}
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => router.push("CreateAssets")}
           >
+            Add Asset
+          </Button>
+        </div>
+
+        {/* TABLE */}
+        <TableContainer component={Paper}>
+          <Table>
             <TableHead>
               <TableRow>
-                {headCells.map((headCell) => (
-                  <TableCell
-                    key={headCell.id}
-                    align={"center"}
-                    padding={headCell.disablePadding ? "none" : "normal"}
-                  >
-                    {headCell.label}
-                  </TableCell>
-                ))}
-                <TableCell align={"center"} padding={"none"}>
-                  Action
-                </TableCell>
+                <TableCell>#</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Code</TableCell>
+                <TableCell>Owner</TableCell>
+                <TableCell>Position</TableCell>
+                <TableCell>Price</TableCell>
+                <TableCell>Unit</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {listAssetData &&
-                listAssetData.map((row, i) => {
-                  return (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      tabIndex={-1}
-                      key={row.assetID}
-                      sx={{ cursor: "pointer" }}
+              {assets.map((item, index) => (
+                <TableRow key={item.assetID}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.code}</TableCell>
+                  <TableCell>{item.owner}</TableCell>
+                  <TableCell>{item.position}</TableCell>
+                  <TableCell>{item.price}</TableCell>
+                  <TableCell>{item.unit}</TableCell>
+                  <TableCell>{item.status}</TableCell>
+
+                  <TableCell align="center">
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleEdit(item.assetID)}
                     >
-                      <TableCell
-                        onClick={() => router.push("/DetailAsset")}
-                        component="th"
-                        scope="row"
-                        padding="none"
-                        align="center"
-                      >
-                        {i + 1}
-                      </TableCell>
-                      <TableCell
-                        onClick={() => router.push("/DetailAsset")}
-                        component="th"
-                        scope="row"
-                        padding="none"
-                      >
-                        {row.assetID}
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        onClick={() => router.push("/DetailAsset")}
-                      >
-                        {row.name}
-                      </TableCell>
-                      <TableCell
-                        onClick={() => router.push("/DetailAsset")}
-                        align="center"
-                      >
-                        {row.unit}
-                      </TableCell>
-                      <TableCell
-                        onClick={() => router.push("/DetailAsset")}
-                        align="center"
-                      >
-                        {row.status}
-                      </TableCell>
-                      <TableCell
-                        onClick={() => router.push("/DetailAsset")}
-                        align="center"
-                      >
-                        {row.note}
-                      </TableCell>
-                      <TableCell align="center">
-                        <div>
-                          <IconButton
-                            color="success"
-                            onClick={() => router.push("EditAssets")}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton color="error">
-                            <DeleteIcon />
-                          </IconButton>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                      <EditIcon />
+                    </IconButton>
+
+                    <IconButton
+                      color="error"
+                      onClick={() => handleOpenConfirm(item.assetID)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* DELETE CONFIRM MODAL */}
+        <Dialog open={openConfirm} onClose={handleCloseConfirm}>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <Typography>Are you sure you want to delete this asset?</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseConfirm}>Cancel</Button>
+            <Button variant="contained" color="error" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
-    </div>
+    </>
   );
 };
 

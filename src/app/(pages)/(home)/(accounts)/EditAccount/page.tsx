@@ -1,145 +1,251 @@
 "use client";
 
-import { Button, IconButton, TextField } from "@mui/material";
-import React, { useState } from "react";
+import { Button, IconButton, TextField, MenuItem } from "@mui/material";
+import React, { useState, useEffect } from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useRouter } from "next/navigation";
-import { DynamicModel } from "@/models/dynamicModel";
-import Dropdown from "@/components/Dropdown";
-import { DatePicker } from "@mui/x-date-pickers";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import dayjs from "dayjs";
+import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
 
 const EditAccountPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id"); // lấy ?id=21
 
-  const positionData: DynamicModel[] = [
-    { name: "Admin", value: "Admin" },
-    { name: "Manager", value: "Manager" },
-    { name: "Staff", value: "Staff" },
+  const [fullName, setFullName] = useState("");
+  const [roleID, setRoleID] = useState<number | null>(null);
+  const [department, setDepartment] = useState("");
+  const [birthday, setBirthday] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
+  const [gender, setGender] = useState("");
+  const [username, setUsername] = useState("");
+
+  // MAP role string từ API -> roleID của bạn
+  const roleMap: any = {
+    "General Manager": 2,
+    "Assets Manager": 3,
+    "Warehouse Manager": 4,
+    Staff: 5,
+    "Technical Staff": 6,
+    "Warehouse Staff": 7,
+  };
+
+  const roleList = [
+    { name: "General Manager", value: 2 },
+    { name: "Assets Manager", value: 3 },
+    { name: "Warehouse Manager", value: 4 },
+    { name: "Staff", value: 5 },
+    { name: "Technical Staff", value: 6 },
+    { name: "Warehouse Staff", value: 7 },
   ];
 
-  const departmentData: DynamicModel[] = [
-    { name: "Lab department", value: "Lab department" },
-    { name: "HR department", value: "HR department" },
-    { name: "Fixing department", value: "Fixing department" },
-  ];
+  // ============================
+  // FETCH ACCOUNT
+  // ============================
+  useEffect(() => {
+    const fetchAccount = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-  // State lưu thông tin tài khoản (dữ liệu mẫu để hiển thị)
-  const [accountData, setAccountData] = useState({
-    fullName: "Nguyen Van A",
-    position: "Manager",
-    department: "HR department",
-    birthday: dayjs("1990-05-15"),
-    phone: "0123456789",
-    email: "nguyenvana@example.com",
-    note: "This is a sample note.",
-  });
+        const res = await axios.get(
+          `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
 
-  // Hàm update state chung cho các TextField
-  const handleChangeText = (field: string, value: string) => {
-    setAccountData((prev) => ({ ...prev, [field]: value }));
+        const a = res.data.data; // <-- API TRẢ VỀ res.data.data !!!
+
+        setFullName(a.fullName);
+        setEmail(a.email);
+        setUsername(a.username);
+        setDepartment(a.department);
+        setGender(a.gender);
+        setPhone(a.phone);
+        setNote(a.note || "");
+        setBirthday(a.dateOfBirth);
+
+        // map string role → roleID (5,6,7...)
+        setRoleID(roleMap[a.role]);
+      } catch (err) {
+        console.log(err);
+        alert("Cannot load account");
+      }
+    };
+
+    if (id) fetchAccount();
+  }, [id]);
+
+  // ============================
+  // UPDATE ROLE
+  // ============================
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const payload = { roleID };
+
+      await axios.put(
+        `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account/${id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
+      alert("Update success!");
+      router.push("/Accounts");
+    } catch (err) {
+      console.log(err);
+      alert("Update failed!");
+    }
   };
 
   return (
-    <div className="assets-page">
-      <div className="assets-page__header">
-        <div className="assets-page__header__title assets-page__header__title__group">
-          <IconButton onClick={() => router.push("/Accounts")}>
-            <ArrowBackIcon />
-          </IconButton>
-          <span>Edit Account</span>
-        </div>
-        <div className="assets-page__header__group">
+    <>
+      <div className="page">
+        <div className="header">
+          <div className="header-left">
+            <IconButton onClick={() => router.push("/accounts")}>
+              <ArrowBackIcon />
+            </IconButton>
+            <span>Edit Account</span>
+          </div>
+
           <Button
             startIcon={<SaveIcon />}
             variant="contained"
-            onClick={() => {
-              // Xử lý lưu dữ liệu ở đây, ví dụ gửi lên API
-              console.log("Save data:", accountData);
-            }}
+            onClick={handleSave}
           >
             Save
           </Button>
         </div>
-      </div>
 
-      <div
-        className="assets-page__container"
-        style={{ height: "calc(100vh - (64px + 24px + 64px + 24px + 64px))" }}
-      >
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Full name:{" "}
-          </span>
-          <TextField
-            className="assets-page__container__group--input"
-            value={accountData.fullName}
-            onChange={(e) => handleChangeText("fullName", e.target.value)}
-          />
-        </div>
+        {/* CARD */}
+        <div className="card">
+          <div className="grid">
+            <div className="field">
+              <label>Full Name</label>
+              <TextField disabled value={fullName} />
+            </div>
 
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Position:{" "}
-          </span>
-          <Dropdown
-            listData={positionData}
-            defaultValue={accountData.position}
-          />
-        </div>
+            <div className="field">
+              <label>Username</label>
+              <TextField disabled value={username} />
+            </div>
 
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Department:{" "}
-          </span>
-          <Dropdown
-            listData={departmentData}
-            defaultValue={accountData.department}
-          />
-        </div>
+            <div className="field">
+              <label>Email</label>
+              <TextField disabled value={email} />
+            </div>
 
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            BirthDay:{" "}
-          </span>
-          <div className="date-picker">
-            <DemoContainer components={["DatePicker"]}>
-              <DatePicker label="Choose date" value={accountData.birthday} />
-            </DemoContainer>
+            <div className="field">
+              <label>Department</label>
+              <TextField disabled value={department} />
+            </div>
+
+            <div className="field">
+              <label>Birthday</label>
+              <TextField disabled value={birthday} />
+            </div>
+
+            <div className="field">
+              <label>Phone Number</label>
+              <TextField disabled value={phone} />
+            </div>
+
+            <div className="field">
+              <label>Gender</label>
+              <TextField disabled value={gender} />
+            </div>
+
+            {/* ONLY ROLE EDITABLE */}
+            <div className="field">
+              <label>Role</label>
+              <TextField
+                select
+                value={roleID ?? ""}
+                onChange={(e) => setRoleID(Number(e.target.value))}
+              >
+                {roleList.map((r) => (
+                  <MenuItem key={r.value} value={r.value}>
+                    {r.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div>
+
+            <div className="field full">
+              <label>Note</label>
+              <TextField disabled multiline minRows={3} value={note} />
+            </div>
           </div>
         </div>
-
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Phone: </span>
-          <TextField
-            className="assets-page__container__group--input"
-            value={accountData.phone}
-            onChange={(e) => handleChangeText("phone", e.target.value)}
-          />
-        </div>
-
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Email: </span>
-          <TextField
-            className="assets-page__container__group--input"
-            value={accountData.email}
-            onChange={(e) => handleChangeText("email", e.target.value)}
-          />
-        </div>
-
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Note: </span>
-          <TextField
-            multiline
-            className="assets-page__container__group--input"
-            value={accountData.note}
-            onChange={(e) => handleChangeText("note", e.target.value)}
-          />
-        </div>
       </div>
-    </div>
+
+      {/* STYLE */}
+      <style jsx>{`
+        .page {
+          padding: 32px;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+          background: #f7f8fa;
+          height: 100%;
+        }
+
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 22px;
+          font-weight: 600;
+        }
+
+        .card {
+          background: white;
+          padding: 28px;
+          border-radius: 14px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.09);
+        }
+
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
+        }
+
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .field.full {
+          grid-column: span 2;
+        }
+
+        label {
+          font-size: 15px;
+          font-weight: 600;
+          color: #344054;
+        }
+      `}</style>
+    </>
   );
 };
 

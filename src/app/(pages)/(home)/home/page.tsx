@@ -51,12 +51,11 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      {/* ⭐ HIỂN THỊ TÊN NGƯỜI DÙNG */}
-      {user && (
+      {/* {user && (
         <div style={{ marginBottom: 20, fontSize: 20, fontWeight: 600 }}>
           Welcome back, {user.name}
         </div>
-      )}
+      )} */}
 
       <div className="home-page__section-1">
         <CountItem title="Total Assets" count={75} color="red" />

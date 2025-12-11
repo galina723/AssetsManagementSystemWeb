@@ -1,237 +1,262 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
 import {
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer,
+  Paper,
   Button,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
 } from "@mui/material";
-import React, { useEffect } from "react";
+
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from "next/navigation";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import { useDispatch } from "react-redux";
-import { addSidebar } from "@/redux/reducers/sidebarReducer";
 
-interface Data {
-  no: number;
-  id: string;
-  name: string;
-  unit: string;
-  status: string;
-  note: string;
-}
-
-interface HeadCell {
-  disablePadding: boolean;
-  id: keyof Data;
-  label: string;
-  numeric: boolean;
-}
-
-function createData(
-  no: number,
-  id: string,
-  name: string,
-  unit: string,
-  status: string,
-  note: string
-): Data {
-  return {
-    no,
-    id,
-    name,
-    unit,
-    status,
-    note,
-  };
-}
-
-const rows = [
-  createData(1, "NV1", "Nguyen Van A", "Nhan vien", "Phong nhan su", ""),
-  createData(2, "NV2", "Nguyen Thi C", "Ki thuat vien", "Phong sua chua", ""),
-  createData(3, "WH3", "Tran Thi B", "Quan ly kho", "Phong kho", ""),
-];
-
-const AccountsPage = () => {
+export default function AccountsPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const router = useRouter();
 
-  const headCells: readonly HeadCell[] = [
-    {
-      id: "no",
-      numeric: false,
-      disablePadding: false,
-      label: "No.",
-    },
-    {
-      id: "id",
-      numeric: false,
-      disablePadding: false,
-      label: "Staff id",
-    },
-    {
-      id: "name",
-      numeric: false,
-      disablePadding: false,
-      label: "Full name",
-    },
-    {
-      id: "unit",
-      numeric: false,
-      disablePadding: false,
-      label: "Position",
-    },
-    {
-      id: "status",
-      numeric: false,
-      disablePadding: false,
-      label: "Department",
-    },
-    {
-      id: "note",
-      numeric: false,
-      disablePadding: false,
-      label: "Note",
-    },
+  // 🔥 Role hiển thị đẹp hơn
+  const roleList = [
+    { key: "Admin", name: "Admin" },
+    { key: "GeneralManager", name: "General Manager" },
+    { key: "AssetsManager", name: "Assets Manager" },
+    { key: "WarehouseManager", name: "Warehouse Manager" },
+    { key: "Staff", name: "Staff" },
+    { key: "TechnicalStaff", name: "Technical Staff" },
   ];
 
-  const dispatch = useDispatch();
+  const getRoleName = (role: string) => {
+    const f = roleList.find((x) => x.key === role);
+    return f ? f.name : role;
+  };
+
+  // 🔥 Fetch API
+  const fetchAPI = async () => {
+    try {
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+      const res = await axios.get(
+        "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
+      const list = Array.isArray(res.data?.data) ? res.data.data : [];
+      setUsers(list);
+    } catch (err) {
+      console.log("API ERROR:", err);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    dispatch(addSidebar("account"));
-  }, [dispatch]);
+    fetchAPI();
+  }, []);
+
+  // 🔥 Add
+  const handleAdd = () => {
+    router.push("/CreateAccount");
+  };
+
+  // 🔥 Edit
+  const handleEdit = (id: string) => {
+    router.push(`/EditAccount?id=${id}`);
+  };
+
+  const handleDelete = (id: number) => {
+    setSelectedId(id);
+    setOpenDelete(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedId) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(
+        `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account/${selectedId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
+      setOpenDelete(false);
+      setSelectedId(null);
+      fetchAPI();
+    } catch (err) {
+      console.log("Delete error:", err);
+    }
+  };
+
+  if (loading)
+    return (
+      <div style={{ padding: 20, textAlign: "center", fontSize: 18 }}>
+        Loading...
+      </div>
+    );
 
   return (
-    <div className="assets-page" style={{ height: "calc(100vh - 120px)" }}>
-      <div className="assets-page__header">
-        <div className="assets-page__header__title">Account</div>
-        <div className="assets-page__header__group">
-          <Button
-            startIcon={<AddIcon />}
-            variant="contained"
-            onClick={() => router.push("CreateAccount")}
-          >
-            Add account
-          </Button>
-        </div>
-      </div>
-
-      <div id="table-data" className="assets-page__container">
-        <TableContainer
-          sx={{
-            maxHeight:
-              "calc(100vh - (64px + 24px + 37px + 24px + 24px + 52px))",
+    <div
+      style={{
+        padding: 24,
+        display: "flex",
+        flexDirection: "column",
+        gap: 20,
+      }}
+    >
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 24,
+            fontWeight: 600,
+            color: "#1f2937",
           }}
         >
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={"medium"}
-          >
-            <TableHead>
+          Account List
+        </h2>
+
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleAdd}
+          sx={{
+            fontWeight: 600,
+            borderRadius: "8px",
+            paddingX: 2.5,
+            paddingY: 1,
+          }}
+        >
+          Add Account
+        </Button>
+      </div>
+
+      {/* TABLE */}
+      <TableContainer
+        component={Paper}
+        elevation={3}
+        sx={{
+          borderRadius: "12px",
+          overflow: "hidden",
+        }}
+      >
+        <Table>
+          <TableHead>
+            <TableRow
+              sx={{
+                background: "#f3f4f6",
+              }}
+            >
+              <TableCell sx={{ fontWeight: 700 }}>No</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Full Name</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Phone</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Gender</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 700 }} align="center">
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {users.length === 0 ? (
               <TableRow>
-                {headCells.map((headCell) => (
-                  <TableCell
-                    key={headCell.id}
-                    align={"center"}
-                    padding={headCell.disablePadding ? "none" : "normal"}
-                  >
-                    {headCell.label}
-                  </TableCell>
-                ))}
-                <TableCell align={"center"} padding={"none"}>
-                  Action
+                <TableCell colSpan={8} align="center">
+                  No data
                 </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => {
-                return (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    tabIndex={-1}
-                    key={row.id}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell
-                      onClick={() => router.push("/DetailAccount")}
-                      component="th"
-                      scope="row"
-                      padding="none"
-                      align="center"
+            ) : (
+              users.map((u, index) => (
+                <TableRow
+                  key={u.userID}
+                  sx={{
+                    "&:hover td": { background: "#f9fafb" },
+                    transition: "0.2s",
+                  }}
+                >
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell>{u.fullName}</TableCell>
+                  <TableCell>{u.department}</TableCell>
+                  <TableCell>{u.phone}</TableCell>
+                  <TableCell>{u.gender}</TableCell>
+
+                  <TableCell>{getRoleName(u.role)}</TableCell>
+
+                  <TableCell align="center">
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleEdit(u.userID.toString())}
                     >
-                      {row.no}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAccount")}
-                      component="th"
-                      scope="row"
-                      padding="none"
+                      <EditIcon />
+                    </IconButton>
+
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDelete(u.userID)}
                     >
-                      {row.id}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAccount")}
-                      align="left"
-                    >
-                      {row.name}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAccount")}
-                      align="center"
-                    >
-                      {row.unit}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAccount")}
-                      align="center"
-                    >
-                      {row.status}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => router.push("/DetailAccount")}
-                      align="center"
-                    >
-                      {row.note}
-                    </TableCell>
-                    <TableCell align="center">
-                      <div>
-                        <IconButton
-                          color="success"
-                          onClick={() => router.push("EditAccount")}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton color="error">
-                          <DeleteIcon />
-                        </IconButton>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={5}
-          page={1}
-          onPageChange={() => {}}
-          onRowsPerPageChange={() => {}}
-        />
-      </div>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* DELETE POPUP */}
+      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+        <DialogTitle>Delete Account</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this account?</Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+
+          <Button color="error" variant="contained" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
-};
-
-export default AccountsPage;
+}
