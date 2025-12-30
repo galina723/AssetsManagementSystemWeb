@@ -1,192 +1,272 @@
 "use client";
 
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import Link from "next/link";
-// Import các icons mới từ react-icons/fa
+import { usePathname } from "next/navigation";
 import {
-  FaTachometerAlt,
-  FaCube,
-  FaWarehouse,
-  FaUserCircle,
-  FaTools,
-  FaEnvelopeOpenText,
-  FaBell,
-} from "react-icons/fa";
-
-import { sidebarSelector } from "@/redux/reducers/sidebarReducer";
-import { useSelector } from "react-redux";
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  Box,
+  Typography,
+} from "@mui/material";
+import {
+  ExpandLess,
+  ExpandMore,
+  Dashboard as FaTachometerAlt,
+  Inventory as FaCube,
+  Warehouse as FaWarehouse,
+  AccountCircle as FaUserCircle,
+  Build as FaTools,
+  Email as FaEnvelopeOpenText,
+  Notifications as FaBell,
+} from "@mui/icons-material";
+import axios from "axios";
 
 interface Props {
   collapse?: boolean;
 }
 
 const Sidebar: FC<Props> = ({ collapse = false }) => {
-  const paramLoc = useSelector(sidebarSelector);
+  const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<string>("");
+  const [openRequest, setOpenRequest] = useState(true);
+
+  useEffect(() => {
+    // ✨ Bước 1: Check username nhanh từ localStorage để hiển thị menu Admin ngay lập tức
+    const storedUsername = localStorage
+      .getItem("username")
+      ?.toLowerCase()
+      .trim();
+    if (storedUsername === "admin") {
+      setIsAdmin(true);
+    }
+
+    // Bước 2: Vẫn fetch role từ API để đảm bảo tính đồng bộ dữ liệu (nếu cần)
+    fetchRole(storedUsername);
+  }, []);
+
+  const fetchRole = async (username?: string) => {
+    try {
+      const userStr = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+
+      // Nếu username là admin, ta đã set isAdmin = true bên trên,
+      // nhưng fetch thêm để lấy các thông tin manager khác nếu có
+      if (userStr && token) {
+        const parsedUser = JSON.parse(userStr);
+        const res: any = await axios.get(
+          `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account/${parsedUser.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
+
+        if (res?.data?.data) {
+          const roleFromApi = res.data.data.role;
+          setUserRole(roleFromApi);
+
+          // Ưu tiên: Nếu username là admin HOẶC role API trả về là Admin
+          if (username === "admin" || roleFromApi === "Admin") {
+            setIsAdmin(true);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Fetch role failed", err);
+    }
+  };
+
+  const isManager = [
+    "GeneralManager",
+    "AssetManager",
+    "WarehouseManager",
+  ].includes(userRole);
+
+  const handleToggleRequest = () => setOpenRequest(!openRequest);
+
+  const getActiveStyle = (path: string) => {
+    const isActive = pathname === path;
+    return {
+      backgroundColor: isActive ? "rgba(59, 130, 246, 0.2)" : "transparent",
+      color: isActive ? "#3b82f6" : "#adb5bd",
+      borderRadius: "8px",
+      mb: "4px",
+      transition: "all 0.2s ease",
+      "& .MuiListItemIcon-root": {
+        color: isActive ? "#3b82f6" : "inherit",
+      },
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        color: "#fff",
+        "& .MuiListItemIcon-root": { color: "#fff" },
+      },
+    };
+  };
 
   return (
-    <>
-      <div className="app-sidebar" style={{ width: collapse ? 0 : 250 }}>
-        {/* LOGO TEXT */}
-        <Link className="app-sidebar__logo" href="/">
-          <div className="logo-text">AMS</div>
-        </Link>
+    <Box
+      className="app-sidebar"
+      sx={{
+        width: collapse ? 0 : 250,
+        bgcolor: "#0e1a2b",
+        minHeight: "100vh",
+        transition: "width 0.3s ease",
+        overflowX: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        p: collapse ? 0 : "20px 12px",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+      }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          color: "#fff",
+          fontWeight: 800,
+          textAlign: "center",
+          mb: 4,
+          letterSpacing: 2,
+        }}
+      >
+        AMS
+      </Typography>
 
-        <div className="app-sidebar__menu">
-          {/* DASHBOARD */}
-          <Link
-            className={`app-sidebar__menu__item ${
-              paramLoc.sidebarData == "home" && "active"
-            }`}
-            href="/"
-          >
-            <FaTachometerAlt /> {/* ICON MỚI */}
-            Dashboard
-          </Link>
+      <List component="nav" sx={{ p: 0 }}>
+        {/* Dashboard luôn có cho cả 2 */}
 
-          {/* ASSETS */}
-          <Link
-            className={`app-sidebar__menu__item ${
-              paramLoc.sidebarData == "asset" && "active"
-            }`}
-            href="/Assets"
-          >
-            <FaCube /> {/* ICON MỚI */}
-            Assets
-          </Link>
-
-          {/* WAREHOUSE */}
-          <Link
-            className={`app-sidebar__menu__item ${
-              paramLoc.sidebarData == "warehouse" && "active"
-            }`}
-            href="/Warehouse"
-          >
-            <FaWarehouse /> {/* ICON MỚI */}
-            Warehouse
-          </Link>
-
-          {/* ACCOUNT */}
-          <Link
-            className={`app-sidebar__menu__item ${
-              paramLoc.sidebarData == "account" && "active"
-            }`}
+        {isAdmin ? (
+          /* 👑 MENU CHO ADMIN (USERNAME = ADMIN) */
+          <ListItemButton
+            component={Link}
             href="/Accounts"
+            sx={getActiveStyle("/Accounts")}
           >
-            <FaUserCircle /> {/* ICON MỚI */}
-            Account
-          </Link>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <FaUserCircle />
+            </ListItemIcon>
+            <ListItemText primary="User Accounts" />
+          </ListItemButton>
+        ) : (
+          /* 🛠️ MENU CHO STAFF THƯỜNG */
+          <>
+            <ListItemButton
+              component={Link}
+              href="/home"
+              sx={getActiveStyle("/home")}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <FaTachometerAlt />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItemButton>
 
-          {/* WORK */}
-          <Link
-            className={`app-sidebar__menu__item ${
-              paramLoc.sidebarData == "work" && "active"
-            }`}
-            href="/Works"
-          >
-            <FaTools /> {/* ICON MỚI */}
-            Work
-          </Link>
+            <ListItemButton
+              component={Link}
+              href="/Assets"
+              sx={getActiveStyle("/Assets")}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <FaCube />
+              </ListItemIcon>
+              <ListItemText primary="Assets" />
+            </ListItemButton>
 
-          {/* REQUESTS */}
-          <Link
-            className={`app-sidebar__menu__item ${
-              paramLoc.sidebarData == "request" && "active"
-            }`}
-            href="/Requests"
-          >
-            <FaEnvelopeOpenText /> {/* ICON MỚI */}
-            Requests
-          </Link>
+            <ListItemButton
+              component={Link}
+              href="/Warehouse"
+              sx={getActiveStyle("/Warehouse")}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <FaWarehouse />
+              </ListItemIcon>
+              <ListItemText primary="Warehouse" />
+            </ListItemButton>
 
-          {/* NOTIFICATION */}
-          <Link
-            className={`app-sidebar__menu__item ${
-              paramLoc.sidebarData == "notification" && "active"
-            }`}
-            href="/Notifications"
-          >
-            <FaBell /> {/* ICON MỚI */}
-            Notification
-          </Link>
-        </div>
-      </div>
+            <ListItemButton
+              component={Link}
+              href="/Works"
+              sx={getActiveStyle("/Works")}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <FaTools />
+              </ListItemIcon>
+              <ListItemText primary="Work" />
+            </ListItemButton>
 
-      <style jsx>{`
-        .app-sidebar {
-          background: #0e1a2b;
-          color: #ffffff;
-          /* 🔥 Xóa height: 100vh để sidebar tự co giãn theo nội dung chính */
-          min-height: 100vh; /* Đảm bảo nó luôn cao ít nhất bằng viewport */
-          height: 100%; /* Cho phép nó kéo dài (nếu container cha là flex/grid) */
-          padding: 20px 0;
-          display: flex;
-          flex-direction: column;
-          transition: width 0.3s ease;
-          overflow-y: auto; /* Cho phép cuộn bên trong nếu menu quá dài */
-        }
+            {/* Requests logic */}
+            {isManager ? (
+              <>
+                <ListItemButton
+                  onClick={handleToggleRequest}
+                  sx={{ color: "#adb5bd", borderRadius: "8px" }}
+                >
+                  <ListItemIcon sx={{ color: "inherit", minWidth: 40 }}>
+                    <FaEnvelopeOpenText />
+                  </ListItemIcon>
+                  <ListItemText primary="Requests" />
+                  {openRequest ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+                <Collapse in={openRequest} timeout="auto">
+                  <List component="div" disablePadding sx={{ pl: 2 }}>
+                    <ListItemButton
+                      component={Link}
+                      href="/PersonalRequests"
+                      sx={getActiveStyle("/PersonalRequests")}
+                    >
+                      <ListItemText
+                        primary="My Requests"
+                        primaryTypographyProps={{ fontSize: "14px", ml: 3 }}
+                      />
+                    </ListItemButton>
+                    <ListItemButton
+                      component={Link}
+                      href="/StaffRequests"
+                      sx={getActiveStyle("/StaffRequests")}
+                    >
+                      <ListItemText
+                        primary="Staff Requests"
+                        primaryTypographyProps={{ fontSize: "14px", ml: 3 }}
+                      />
+                    </ListItemButton>
+                  </List>
+                </Collapse>
+              </>
+            ) : (
+              <ListItemButton
+                component={Link}
+                href="/PersonalRequests"
+                sx={getActiveStyle("/PersonalRequests")}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <FaEnvelopeOpenText />
+                </ListItemIcon>
+                <ListItemText primary="Requests" />
+              </ListItemButton>
+            )}
 
-        /* LOGO TEXT STYLE */
-        .logo-text {
-          font-size: 32px;
-          font-weight: 800;
-          color: #fff;
-          letter-spacing: 2px;
-          text-shadow: 0 3px 8px rgba(255, 255, 255, 0.2);
-        }
-
-        .app-sidebar__logo {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 30px;
-          text-decoration: none;
-        }
-
-        .app-sidebar__menu {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .app-sidebar__menu__item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 20px;
-          border-radius: 8px;
-          text-decoration: none;
-          color: #d9e2f1;
-          font-size: 15px;
-          font-weight: 500;
-          transition: 0.25s ease;
-        }
-
-        .app-sidebar__menu__item svg {
-          /* Điều chỉnh kích thước và màu sắc của icon */
-          font-size: 18px;
-          color: #9ab3d1;
-          transition: 0.25s ease;
-        }
-
-        .app-sidebar__menu__item:hover {
-          background: #1c2d45;
-          color: #ffffff;
-        }
-
-        .app-sidebar__menu__item:hover svg {
-          color: #ffffff;
-        }
-
-        .app-sidebar__menu__item.active {
-          background: #2b4570;
-          color: #ffffff;
-          font-weight: 600;
-        }
-
-        .app-sidebar__menu__item.active svg {
-          color: #ffffff;
-        }
-      `}</style>
-    </>
+            <ListItemButton
+              component={Link}
+              href="/Notifications"
+              sx={getActiveStyle("/Notifications")}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <FaBell />
+              </ListItemIcon>
+              <ListItemText primary="Notification" />
+            </ListItemButton>
+          </>
+        )}
+      </List>
+    </Box>
   );
 };
 

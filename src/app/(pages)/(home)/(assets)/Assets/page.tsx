@@ -19,64 +19,108 @@ import {
   Box,
   Chip,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
 interface AssetModel {
   assetID: number;
+  warehouseID: number;
   name: string;
   code: string;
-  currency: string;
+  owner: string;
   position: string;
+  dateOfPurchase: string;
   price: number;
   unit: string;
+  currency: string;
+  note: string;
   status: string;
+  purpose: string;
+  supplier: string;
+  warrantyDuration: number;
+  warrantyDepartment: string;
+  totalQuantity: number;
+  availableQuantity: number;
+  latitude: number;
+  longitude: number;
+  isInWarehouse: boolean;
 }
+
+// 🔥 Màu chính Pastel
+const mainPastelColor = "#a0c4ff";
+const mainPastelHoverColor = "#b8cffc";
+const mainPastelTextColor = "#3d5a80";
+const deletePastelColor = "#ffadad";
+
+// Helper component for Modal rows
+const DetailRow = ({
+  label,
+  value,
+  color = "#2f3e46",
+}: {
+  label: string;
+  value: any;
+  color?: string;
+}) => (
+  <Box sx={{ mb: 1.5 }}>
+    <Typography
+      variant="caption"
+      sx={{
+        color: "#8e9aaf",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        display: "block",
+      }}
+    >
+      {label}
+    </Typography>
+    <Typography
+      variant="body2"
+      sx={{ color: value === "N/A" ? "#adb5bd" : color, fontWeight: 500 }}
+    >
+      {value || "N/A"}
+    </Typography>
+  </Box>
+);
 
 const AssetsPage = () => {
   const router = useRouter();
   const [assets, setAssets] = useState<AssetModel[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal state
+  // Modal states
   const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [viewingAsset, setViewingAsset] = useState<AssetModel | null>(null);
 
-  // 🔥 Màu chính Pastel
-  const mainPastelColor = "#a0c4ff"; // Xanh pastel chủ đạo
-  const mainPastelHoverColor = "#b8cffc";
-  const mainPastelTextColor = "#3d5a80"; // Màu chữ tối nhẹ
-  const deletePastelColor = "#ffadad"; // Hồng pastel cho Delete
-
-  // Helper để xác định màu Chip dựa trên Status
   const getStatusChipColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "available":
       case "active":
-        return { backgroundColor: "#caffbf", color: "#1f5700" }; // Xanh mint
+        return { backgroundColor: "#caffbf", color: "#1f5700" };
       case "in use":
       case "assigned":
-        return { backgroundColor: "#ffd6a5", color: "#7d4600" }; // Cam nhạt
-      case "maintenance":
+        return { backgroundColor: "#ffd6a5", color: "#7d4600" };
       case "broken":
       case "retired":
-        return { backgroundColor: deletePastelColor, color: "#610000" }; // Hồng/Đỏ nhạt
+        return { backgroundColor: deletePastelColor, color: "#610000" };
       default:
         return { backgroundColor: "#f0f0f0", color: "#4a4a4a" };
     }
   };
 
-  // Load assets
   const fetchAssets = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-
       const res = await axios.get(
         "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset",
         {
@@ -86,11 +130,9 @@ const AssetsPage = () => {
           },
         }
       );
-
       setAssets(res.data.data || []);
     } catch (err) {
       console.log(err);
-      // alert("Cannot load assets");
     } finally {
       setLoading(false);
     }
@@ -100,46 +142,26 @@ const AssetsPage = () => {
     fetchAssets();
   }, []);
 
-  // Open confirm modal
-  const handleOpenConfirm = (id: number) => {
-    setSelectedId(id);
-    setOpenConfirm(true);
+  const handleOpenDetail = (asset: AssetModel) => {
+    setViewingAsset(asset);
+    setOpenDetail(true);
   };
 
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
-    setSelectedId(null);
-  };
-
-  // DELETE
   const handleDelete = async () => {
     if (!selectedId) return;
-
     try {
       const token = localStorage.getItem("token");
-
       await axios.delete(
         `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset/${selectedId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "ngrok-skip-browser-warning": "true",
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      alert("Asset deleted");
-      handleCloseConfirm();
+      setOpenConfirm(false);
       fetchAssets();
     } catch (err) {
-      console.log(err);
       alert("Delete failed");
     }
-  };
-
-  // Edit
-  const handleEdit = (id: number) => {
-    router.push(`/EditAssets?id=${id}`);
   };
 
   if (loading)
@@ -150,13 +172,9 @@ const AssetsPage = () => {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "80vh",
-          backgroundColor: "#fcfcfc",
         }}
       >
         <CircularProgress sx={{ color: mainPastelColor }} />
-        <Typography variant="h6" sx={{ ml: 2, color: mainPastelTextColor }}>
-          Loading Sweetness...
-        </Typography>
       </Box>
     );
 
@@ -164,8 +182,7 @@ const AssetsPage = () => {
     <Box
       sx={{
         background: "#fcfcfc",
-        // 🔥 Giảm padding container ngoài từ 4 (32px) xuống 3 (24px)
-        padding: { xs: 2, sm: 3, md: 3 },
+        padding: { xs: 2, sm: 3 },
         minHeight: "100vh",
       }}
     >
@@ -175,23 +192,15 @@ const AssetsPage = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          // 🔥 Giảm mb từ 4 (32px) xuống 3 (24px)
           mb: 3,
         }}
       >
         <Typography
           variant="h4"
-          component="h2"
-          sx={{
-            fontWeight: 700,
-            color: mainPastelTextColor,
-            textShadow: "0 1px 2px rgba(0,0,0,0.05)",
-          }}
+          sx={{ fontWeight: 700, color: mainPastelTextColor }}
         >
           Assets Management
         </Typography>
-
-        {/* ADD ASSET BUTTON - STYLE PASTEL NỔI BẬT */}
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -200,21 +209,10 @@ const AssetsPage = () => {
             fontWeight: 700,
             borderRadius: "12px",
             paddingX: 3,
-            // 🔥 Giảm paddingY từ 1.2 xuống 1
-            paddingY: 1,
-            fontSize: "0.95rem", // Giảm font size nhẹ
-
             background: `linear-gradient(145deg, ${mainPastelHoverColor}, ${mainPastelColor})`,
             color: mainPastelTextColor,
-
+            textTransform: "none",
             boxShadow: "0 6px 15px rgba(160, 196, 255, 0.4)",
-
-            "&:hover": {
-              background: `linear-gradient(145deg, ${mainPastelColor}, ${mainPastelHoverColor})`,
-              boxShadow: "0 8px 20px rgba(160, 196, 255, 0.6)",
-              transform: "translateY(-1px)",
-            },
-            transition: "all 0.3s ease-in-out",
           }}
         >
           Add New Asset
@@ -224,20 +222,11 @@ const AssetsPage = () => {
       {/* TABLE */}
       <TableContainer
         component={Paper}
-        elevation={2}
-        sx={{
-          borderRadius: "16px",
-          border: "1px solid #e0e7f2",
-          overflow: "auto",
-        }}
+        sx={{ borderRadius: "16px", border: "1px solid #e0e7f2" }}
       >
         <Table>
           <TableHead>
-            <TableRow
-              sx={{
-                background: "#f0f4ff", // Xanh nhạt tinh tế cho Header
-              }}
-            >
+            <TableRow sx={{ background: "#f0f4ff" }}>
               {[
                 "#",
                 "Name",
@@ -248,155 +237,221 @@ const AssetsPage = () => {
                 "Unit",
                 "Status",
                 "Actions",
-              ].map((header) => (
+              ].map((h) => (
                 <TableCell
-                  key={header}
+                  key={h}
                   sx={{
                     fontWeight: 700,
                     color: "#5c677d",
-                    fontSize: "0.9rem",
-                    textAlign: header === "Actions" ? "center" : "left",
-                    // 🔥 Giảm padding TH
                     padding: "10px 8px",
                   }}
+                  align={h === "Actions" ? "center" : "left"}
                 >
-                  {header}
+                  {h}
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
-
           <TableBody>
-            {assets.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
-                  <Typography color="textSecondary">
-                    No assets found.
-                  </Typography>
+            {assets.map((item, index) => (
+              <TableRow
+                key={item.assetID}
+                sx={{
+                  "&:nth-of-type(odd)": { backgroundColor: "#f9fbfd" },
+                  "&:hover td": { backgroundColor: "#eef2ff" },
+                }}
+              >
+                <TableCell sx={{ padding: "8px" }}>{index + 1}</TableCell>
+                <TableCell sx={{ fontWeight: 500, padding: "8px" }}>
+                  {item.name}
+                </TableCell>
+                <TableCell sx={{ padding: "8px" }}>{item.code}</TableCell>
+                <TableCell sx={{ padding: "8px" }}>{item.currency}</TableCell>
+                <TableCell sx={{ padding: "8px" }}>{item.position}</TableCell>
+                <TableCell sx={{ padding: "8px" }}>
+                  {item.price?.toLocaleString()}
+                </TableCell>
+                <TableCell sx={{ padding: "8px" }}>{item.unit}</TableCell>
+                <TableCell sx={{ padding: "8px" }}>
+                  <Chip
+                    label={item.status}
+                    size="small"
+                    sx={{
+                      fontWeight: 600,
+                      ...getStatusChipColor(item.status),
+                      minWidth: 80,
+                    }}
+                  />
+                </TableCell>
+                <TableCell align="center" sx={{ padding: "8px" }}>
+                  <IconButton
+                    onClick={() => handleOpenDetail(item)}
+                    size="small"
+                    sx={{ color: mainPastelColor }}
+                  >
+                    <VisibilityIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() =>
+                      router.push(`/EditAssets?id=${item.assetID}`)
+                    }
+                    size="small"
+                    sx={{ color: "#ffd6a5" }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => {
+                      setSelectedId(item.assetID);
+                      setOpenConfirm(true);
+                    }}
+                    size="small"
+                    sx={{ color: deletePastelColor }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
-            ) : (
-              assets.map((item, index) => {
-                const statusStyle = getStatusChipColor(item.status);
-                return (
-                  <TableRow
-                    key={item.assetID}
-                    sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9fbfd" },
-                      "&:hover td": {
-                        backgroundColor: "#eef2ff",
-                        transition: "0.2s",
-                      },
-                    }}
-                  >
-                    {/* 🔥 Giảm padding TD */}
-                    <TableCell sx={{ color: "#333", padding: "8px 8px" }}>
-                      {index + 1}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: "#333",
-                        fontWeight: 500,
-                        padding: "8px 8px",
-                      }}
-                    >
-                      {item.name}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "8px 8px" }}>
-                      {item.code}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "8px 8px" }}>
-                      {item.currency}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "8px 8px" }}>
-                      {item.position}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "8px 8px" }}>
-                      {/* Format price to 2 decimal places */}
-                      {item.price.toLocaleString("en-US", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "8px 8px" }}>
-                      {item.unit}
-                    </TableCell>
-
-                    {/* STATUS CHIP */}
-                    <TableCell sx={{ padding: "8px 8px" }}>
-                      <Chip
-                        label={item.status}
-                        size="small"
-                        sx={{
-                          fontWeight: 600,
-                          ...statusStyle,
-                          minWidth: 90,
-                        }}
-                      />
-                    </TableCell>
-
-                    <TableCell align="center" sx={{ padding: "8px 8px" }}>
-                      {/* EDIT ICON */}
-                      <IconButton
-                        onClick={() => handleEdit(item.assetID)}
-                        title="Edit"
-                        size="small" // 🔥 Giảm kích thước icon button
-                        sx={{ color: "#ffd6a5" }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-
-                      {/* DELETE ICON */}
-                      <IconButton
-                        onClick={() => handleOpenConfirm(item.assetID)}
-                        title="Delete"
-                        size="small" // 🔥 Giảm kích thước icon button
-                        sx={{ color: deletePastelColor }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* DELETE CONFIRM MODAL - STYLE PASTEL */}
-      <Dialog open={openConfirm} onClose={handleCloseConfirm}>
+      {/* DETAIL MODAL */}
+      <Dialog
+        open={openDetail}
+        onClose={() => setOpenDetail(false)}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{ sx: { borderRadius: "20px" } }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 800,
+            color: mainPastelTextColor,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          Asset Specifications
+          {viewingAsset && (
+            <Chip
+              label={viewingAsset.status}
+              sx={{
+                ...getStatusChipColor(viewingAsset.status),
+                fontWeight: 700,
+              }}
+            />
+          )}
+        </DialogTitle>
+        <Divider sx={{ mx: 3 }} />
+        <DialogContent>
+          {viewingAsset && (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" },
+                gap: 2,
+              }}
+            >
+              <Box sx={{ gridColumn: "span 3" }}>
+                <DetailRow
+                  label="Asset Name"
+                  value={viewingAsset.name}
+                  color={mainPastelTextColor}
+                />
+              </Box>
+              <DetailRow label="Code" value={viewingAsset.code} />
+              <DetailRow label="Owner" value={viewingAsset.owner} />
+              <DetailRow label="Supplier" value={viewingAsset.supplier} />
+
+              <Box sx={{ gridColumn: "span 3" }}>
+                <Divider sx={{ my: 1 }} />
+              </Box>
+
+              <DetailRow
+                label="Purchase Date"
+                value={
+                  viewingAsset.dateOfPurchase
+                    ? new Date(viewingAsset.dateOfPurchase).toLocaleDateString()
+                    : "N/A"
+                }
+              />
+              <DetailRow
+                label="Price"
+                value={`${viewingAsset.price} ${viewingAsset.currency}`}
+              />
+              <DetailRow label="Unit" value={viewingAsset.unit} />
+
+              <DetailRow label="Total Qty" value={viewingAsset.totalQuantity} />
+              <DetailRow
+                label="Available"
+                value={viewingAsset.availableQuantity}
+              />
+              <DetailRow
+                label="Warranty"
+                value={`${viewingAsset.warrantyDuration} Months`}
+              />
+
+              <Box sx={{ gridColumn: "span 3" }}>
+                <Divider sx={{ my: 1 }} />
+              </Box>
+
+              <Box sx={{ gridColumn: "span 2" }}>
+                <DetailRow label="Position" value={viewingAsset.position} />
+              </Box>
+              <DetailRow
+                label="Warranty Dept"
+                value={viewingAsset.warrantyDepartment}
+              />
+
+              <Box sx={{ gridColumn: "span 3" }}>
+                <DetailRow label="Purpose" value={viewingAsset.purpose} />
+              </Box>
+              <Box sx={{ gridColumn: "span 3" }}>
+                <DetailRow
+                  label="Note"
+                  value={viewingAsset.note || "No additional notes"}
+                />
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            onClick={() => setOpenDetail(false)}
+            variant="contained"
+            fullWidth
+            sx={{
+              backgroundColor: mainPastelColor,
+              color: mainPastelTextColor,
+              fontWeight: 700,
+              borderRadius: "10px",
+              textTransform: "none",
+            }}
+          >
+            Close Asset Details
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* DELETE DIALOG */}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle sx={{ color: deletePastelColor, fontWeight: 700 }}>
-          <DeleteIcon sx={{ verticalAlign: "middle", mr: 1 }} />
           Confirm Deletion
         </DialogTitle>
         <DialogContent dividers>
-          <Typography color="#4a4a4a">
-            Are you sure you want to delete this asset? This action cannot be
-            undone.
-          </Typography>
+          <Typography>Delete this asset? This cannot be undone.</Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button
-            onClick={handleCloseConfirm}
-            variant="outlined"
-            sx={{ color: "#6a798a" }}
-          >
-            Cancel
-          </Button>
+          <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
           <Button
             variant="contained"
             onClick={handleDelete}
-            autoFocus
-            sx={{
-              backgroundColor: deletePastelColor, // Hồng Pastel
-              color: "#610000",
-              "&:hover": {
-                backgroundColor: "#ff8c8c",
-              },
-            }}
+            sx={{ backgroundColor: deletePastelColor, color: "#610000" }}
           >
-            Yes, Delete
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

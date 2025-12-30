@@ -11,6 +11,7 @@ import {
   CircularProgress,
 } from "@mui/material"; // Thêm Button, Box, Typography
 import SaveIcon from "@mui/icons-material/Save"; // Thêm icon Save
+import { useRouter } from "next/navigation";
 
 interface AccountModel {
   userID: number;
@@ -45,6 +46,8 @@ const pastelTextFieldSx = {
 };
 
 const AddWarehouse = () => {
+  const router = useRouter();
+
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -119,6 +122,7 @@ const AddWarehouse = () => {
       );
 
       alert("Warehouse created!");
+      router.push("/Warehouse");
     } catch (e) {
       console.log(e);
       alert("Error creating warehouse!");

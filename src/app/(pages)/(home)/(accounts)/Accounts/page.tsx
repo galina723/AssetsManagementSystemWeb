@@ -21,39 +21,40 @@ import {
   Chip,
   Box,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useRouter } from "next/navigation";
 
-// 🔥 Bảng ánh xạ Role với màu Pastel
 const roleMap: {
   [key: string]: { name: string; pastelColor: string; textColor: string };
 } = {
-  Admin: { name: "Admin", pastelColor: "#ffadad", textColor: "#610000" }, // Hồng nhạt
+  Admin: { name: "Admin", pastelColor: "#ffadad", textColor: "#610000" },
   GeneralManager: {
     name: "General Manager",
     pastelColor: "#ffd6a5",
     textColor: "#7d4600",
-  }, // Cam nhạt
+  },
   AssetsManager: {
     name: "Assets Manager",
     pastelColor: "#a0c4ff",
     textColor: "#003b80",
-  }, // Xanh dương nhạt
+  },
   WarehouseManager: {
     name: "Warehouse Manager",
     pastelColor: "#caffbf",
     textColor: "#1f5700",
-  }, // Xanh mint
+  },
   TechnicalStaff: {
     name: "Technical Staff",
     pastelColor: "#bdb2ff",
     textColor: "#3e008d",
-  }, // Tím lavender
-  Staff: { name: "Staff", pastelColor: "#ffc6ff", textColor: "#7f007f" }, // Tím hồng nhạt
+  },
+  Staff: { name: "Staff", pastelColor: "#ffc6ff", textColor: "#7f007f" },
 };
 
 export default function AccountsPage() {
@@ -61,9 +62,11 @@ export default function AccountsPage() {
   const [loading, setLoading] = useState(true);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [openView, setOpenView] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
   const router = useRouter();
 
-  // Helper Function để lấy thông tin Role với màu pastel
   const getRoleInfo = (role: string) => {
     return (
       roleMap[role] || {
@@ -74,12 +77,10 @@ export default function AccountsPage() {
     );
   };
 
-  // 🔥 Fetch API (không đổi)
   const fetchAPI = async () => {
     try {
       const token =
         typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
       const res = await axios.get(
         "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account",
         {
@@ -89,11 +90,9 @@ export default function AccountsPage() {
           },
         }
       );
-
       const list = Array.isArray(res.data?.data) ? res.data.data : [];
       setUsers(list);
     } catch (err) {
-      console.log("API ERROR:", err);
       setUsers([]);
     } finally {
       setLoading(false);
@@ -104,14 +103,13 @@ export default function AccountsPage() {
     fetchAPI();
   }, []);
 
-  // 🔥 Add / Edit / Delete Handlers (không đổi)
-  const handleAdd = () => {
-    router.push("/CreateAccount");
+  const handleView = (user: any) => {
+    setSelectedUser(user);
+    setOpenView(true);
   };
 
-  const handleEdit = (id: string) => {
-    router.push(`/EditAccount?id=${id}`);
-  };
+  const handleAdd = () => router.push("/CreateAccount");
+  const handleEdit = (id: string) => router.push(`/EditAccount?id=${id}`);
 
   const handleDelete = (id: number) => {
     setSelectedId(id);
@@ -120,10 +118,8 @@ export default function AccountsPage() {
 
   const confirmDelete = async () => {
     if (!selectedId) return;
-
     try {
       const token = localStorage.getItem("token");
-
       await axios.delete(
         `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account/${selectedId}`,
         {
@@ -133,12 +129,10 @@ export default function AccountsPage() {
           },
         }
       );
-
       setOpenDelete(false);
-      setSelectedId(null);
       fetchAPI();
     } catch (err) {
-      console.log("Delete error:", err);
+      console.log(err);
     }
   };
 
@@ -150,28 +144,14 @@ export default function AccountsPage() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "80vh",
-          backgroundColor: "#fcfcfc", // Nền loading cũng pastel
         }}
       >
-        <CircularProgress sx={{ color: "#a0c4ff" }} /> {/* Màu xanh pastel */}
-        <Typography variant="h6" sx={{ ml: 2, color: "#4a4a4a" }}>
-          Loading Sweetness...
-        </Typography>
+        <CircularProgress size={30} sx={{ color: "#a0c4ff" }} />
       </Box>
     );
 
   return (
-    <Box
-      sx={{
-        // 🔥 Giảm padding ngoài từ 4 (32px) xuống 3 (24px)
-        padding: 3,
-        display: "flex",
-        flexDirection: "column",
-        // 🔥 Giảm gap từ 4 (32px) xuống 3 (24px)
-        gap: 3,
-        minHeight: "100%",
-      }}
-    >
+    <Box sx={{ padding: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       {/* HEADER */}
       <Box
         sx={{
@@ -180,42 +160,24 @@ export default function AccountsPage() {
           justifyContent: "space-between",
         }}
       >
-        <Typography
-          variant="h4"
-          component="h2"
-          sx={{
-            fontWeight: 700,
-            color: "#4a4a4a",
-            textShadow: "0 1px 2px rgba(0,0,0,0.05)",
-          }}
-        >
+        <Typography variant="h5" sx={{ fontWeight: 700, color: "#4a4a4a" }}>
           Account List
         </Typography>
-
-        {/* Nút Add với màu Pastel */}
         <Button
           variant="contained"
+          size="small"
           startIcon={<AddIcon />}
           onClick={handleAdd}
           sx={{
             fontWeight: 700,
-            borderRadius: "10px",
-            // 🔥 Giảm padding Y từ 1.5 (12px) xuống 1 (8px)
-            paddingX: 3,
-            paddingY: 1,
-            fontSize: "0.95rem", // Hơi giảm font size
-
-            // Màu Xanh Pastel
+            borderRadius: "8px",
+            paddingX: 2,
             background: "linear-gradient(135deg, #a0c4ff 30%, #b8cffc 90%)",
             color: "#3d5a80",
-            "&:hover": {
-              background: "linear-gradient(135deg, #b8cffc 30%, #a0c4ff 90%)",
-              boxShadow: "0 6px 15px rgba(160, 196, 255, 0.5)",
-            },
-            boxShadow: "0 4px 10px rgba(160, 196, 255, 0.4)",
+            textTransform: "none",
           }}
         >
-          Add New Account
+          Add Account
         </Button>
       </Box>
 
@@ -223,167 +185,229 @@ export default function AccountsPage() {
       <TableContainer
         component={Paper}
         sx={{
-          borderRadius: "16px",
-          overflow: "auto",
+          borderRadius: "12px",
           border: "1px solid #e0e7f2",
+          boxShadow: "none",
         }}
       >
-        <Table sx={{ minWidth: 900 }}>
+        <Table sx={{ minWidth: 800 }} size="small">
           <TableHead>
-            <TableRow
-              sx={{
-                background: "#f0f4ff", // Xanh nhạt tinh tế cho Header
-              }}
-            >
-              {/* CÁC TH/TD DÙNG MỘT HÀM STYLE RIÊNG ĐỂ DỄ QUẢN LÝ PADDING */}
-              {[
-                "#",
-                "Email",
-                "Full Name",
-                "Department",
-                "Phone",
-                "Gender",
-                "Role",
-                "Actions",
-              ].map((label, index) => (
-                <TableCell
-                  key={index}
-                  align={label === "Actions" ? "center" : "left"}
-                  sx={{
-                    fontWeight: 700,
-                    color: "#5c677d",
-                    fontSize: "0.9rem", // Hơi giảm font
-                    padding: "12px 10px", // 🔥 Giảm padding TH
-                  }}
-                >
-                  {label}
-                </TableCell>
-              ))}
+            <TableRow sx={{ background: "#f8faff" }}>
+              {["#", "Email", "Full Name", "Department", "Role", "Actions"].map(
+                (label, index) => (
+                  <TableCell
+                    key={index}
+                    sx={{
+                      fontWeight: 700,
+                      color: "#5c677d",
+                      padding: "8px 12px", // Giảm padding header
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    {label}
+                  </TableCell>
+                )
+              )}
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
-                  <Typography color="textSecondary">
-                    No user accounts found.
-                  </Typography>
+            {users.map((u, index) => (
+              <TableRow
+                key={u.userID}
+                sx={{
+                  "&:nth-of-type(odd)": { backgroundColor: "#fdfdfd" },
+                  "&:hover": { backgroundColor: "#f0f4ff" },
+                }}
+              >
+                <TableCell sx={{ padding: "6px 12px" }}>{index + 1}</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 500,
+                    padding: "6px 12px",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  {u.email}
+                </TableCell>
+                <TableCell sx={{ padding: "6px 12px", fontSize: "0.875rem" }}>
+                  {u.fullName}
+                </TableCell>
+                <TableCell sx={{ padding: "6px 12px", fontSize: "0.875rem" }}>
+                  {u.department}
+                </TableCell>
+                <TableCell sx={{ padding: "6px 12px" }}>
+                  <Chip
+                    label={getRoleInfo(u.role).name}
+                    size="small"
+                    sx={{
+                      fontSize: "0.75rem",
+                      height: "20px",
+                      fontWeight: 600,
+                      backgroundColor: getRoleInfo(u.role).pastelColor,
+                      color: getRoleInfo(u.role).textColor,
+                    }}
+                  />
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ padding: "4px 8px", whiteSpace: "nowrap" }}
+                >
+                  <IconButton
+                    onClick={() => handleView(u)}
+                    size="small"
+                    sx={{ color: "#a0c4ff", p: 0.5 }}
+                  >
+                    <VisibilityIcon fontSize="inherit" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleEdit(u.userID.toString())}
+                    size="small"
+                    sx={{ color: "#ffd6a5", p: 0.5 }}
+                  >
+                    <EditIcon fontSize="inherit" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(u.userID)}
+                    size="small"
+                    sx={{ color: "#ffadad", p: 0.5 }}
+                  >
+                    <DeleteIcon fontSize="inherit" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
-            ) : (
-              users.map((u, index) => {
-                const roleInfo = getRoleInfo(u.role);
-                return (
-                  <TableRow
-                    key={u.userID}
-                    sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9fbfd" },
-                      "&:hover td": {
-                        backgroundColor: "#eef2ff",
-                        transition: "0.2s",
-                      },
-                    }}
-                  >
-                    {/* 🔥 Giảm Padding TD */}
-                    <TableCell sx={{ color: "#333", padding: "10px" }}>
-                      {index + 1}
-                    </TableCell>
-                    <TableCell
-                      sx={{ fontWeight: 500, color: "#333", padding: "10px" }}
-                    >
-                      {u.email}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "10px" }}>
-                      {u.fullName}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "10px" }}>
-                      {u.department}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "10px" }}>
-                      {u.phone}
-                    </TableCell>
-                    <TableCell sx={{ color: "#333", padding: "10px" }}>
-                      {u.gender}
-                    </TableCell>
-
-                    <TableCell sx={{ padding: "10px" }}>
-                      {/* Chip với màu Pastel */}
-                      <Chip
-                        label={roleInfo.name}
-                        size="small"
-                        sx={{
-                          fontWeight: 600,
-                          minWidth: 100, // Giảm minWidth chip
-                          backgroundColor: roleInfo.pastelColor,
-                          color: roleInfo.textColor,
-                        }}
-                      />
-                    </TableCell>
-
-                    <TableCell align="center" sx={{ padding: "10px" }}>
-                      <IconButton
-                        onClick={() => handleEdit(u.userID.toString())}
-                        title="Edit"
-                        size="small" // Giảm kích thước icon button
-                        sx={{ color: "#ffd6a5" }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-
-                      <IconButton
-                        onClick={() => handleDelete(u.userID)}
-                        title="Delete"
-                        size="small" // Giảm kích thước icon button
-                        sx={{ color: "#ffadad" }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* DELETE POPUP (Không thay đổi style của Modal) */}
-      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
-        <DialogTitle sx={{ color: "#ffadad", fontWeight: 700 }}>
-          <DeleteIcon sx={{ verticalAlign: "middle", mr: 1 }} />
-          Confirm Deletion
+      {/* MODAL VIEW DETAIL */}
+      <Dialog
+        open={openView}
+        onClose={() => setOpenView(false)}
+        PaperProps={{ sx: { borderRadius: "12px", width: "360px" } }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            color: "#4a4a4a",
+            textAlign: "center",
+            bgcolor: "#f8faff",
+            py: 1.5,
+            fontSize: "1.1rem",
+          }}
+        >
+          Account Details
         </DialogTitle>
-        <DialogContent dividers>
-          <Typography color="#4a4a4a">
-            You are about to delete an account. This action cannot be undone.
-            <br />
-            **Are you sure you want to proceed?**
-          </Typography>
+        <DialogContent sx={{ mt: 1, px: 3, pb: 2 }}>
+          {selectedUser && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {[
+                {
+                  label: "FULL NAME",
+                  value: selectedUser.fullName,
+                  bold: true,
+                },
+                { label: "EMAIL", value: selectedUser.email },
+                { label: "PHONE", value: selectedUser.phone || "N/A" },
+                { label: "DEPARTMENT", value: selectedUser.department },
+              ].map((item, idx) => (
+                <React.Fragment key={idx}>
+                  <Box sx={{ py: 0.5 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#a0aec0",
+                        fontWeight: 700,
+                        fontSize: "0.65rem",
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontWeight: item.bold ? 600 : 400,
+                        color: "#333",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      {item.value}
+                    </Typography>
+                  </Box>
+                  {idx < 3 && <Divider />}
+                </React.Fragment>
+              ))}
+              <Box sx={{ py: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "#a0aec0",
+                    fontWeight: 700,
+                    fontSize: "0.65rem",
+                  }}
+                >
+                  ROLE
+                </Typography>
+                <Box sx={{ mt: 0.2 }}>
+                  <Chip
+                    label={getRoleInfo(selectedUser.role).name}
+                    size="small"
+                    sx={{
+                      height: "22px",
+                      fontSize: "0.75rem",
+                      backgroundColor: getRoleInfo(selectedUser.role)
+                        .pastelColor,
+                      color: getRoleInfo(selectedUser.role).textColor,
+                      fontWeight: 700,
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+          )}
         </DialogContent>
-
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions
+          sx={{ p: 1.5, justifyContent: "center", borderTop: "1px solid #eee" }}
+        >
           <Button
-            onClick={() => setOpenDelete(false)}
-            variant="outlined"
-            sx={{ color: "#6a798a" }}
-          >
-            Cancel
-          </Button>
-
-          <Button
+            onClick={() => setOpenView(false)}
             variant="contained"
-            onClick={confirmDelete}
-            autoFocus
+            size="small"
             sx={{
-              backgroundColor: "#ffadad", // Hồng Pastel
-              color: "#610000",
-              "&:hover": {
-                backgroundColor: "#ff8c8c",
-              },
+              bgcolor: "#a0c4ff",
+              color: "#FFF",
+              borderRadius: "8px",
+              textTransform: "none",
+              px: 4,
+              "&:hover": { bgcolor: "#b8cffc" },
             }}
           >
-            Yes, Delete
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* DELETE CONFIRM */}
+      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+        <DialogTitle sx={{ color: "#ffadad", fontWeight: 700, py: 1.5 }}>
+          Confirm Deletion
+        </DialogTitle>
+        <DialogContent dividers sx={{ py: 2 }}>
+          <Typography variant="body2">
+            Are you sure you want to proceed?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 1 }}>
+          <Button onClick={() => setOpenDelete(false)} size="small">
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            variant="contained"
+            size="small"
+            sx={{ backgroundColor: "#ffadad", textTransform: "none" }}
+          >
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

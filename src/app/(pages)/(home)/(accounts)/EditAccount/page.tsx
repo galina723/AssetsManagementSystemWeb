@@ -104,7 +104,7 @@ const EditAccountPage = () => {
           }
         );
 
-        const a = res.data.data; // API TRẢ VỀ res.data.data !!!
+        const a = res.data.data;
 
         setFullName(a.fullName);
         setEmail(a.email);
