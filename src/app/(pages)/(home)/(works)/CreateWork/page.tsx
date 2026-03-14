@@ -57,7 +57,7 @@ export default function CreateWork() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       alert("Created successfully!");

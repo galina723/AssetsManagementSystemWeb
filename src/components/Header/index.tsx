@@ -68,7 +68,7 @@ const Header: FC<Props> = (props) => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setProfileData(res.data.data);
       if (!isSilent) setOpenModal(true);

@@ -71,19 +71,19 @@ const HomePage = () => {
       const [assetRes, warehouseRes, accountRes, workRes] = await Promise.all([
         axios.get(
           "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset",
-          config
+          config,
         ),
         axios.get(
           "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/warehouse",
-          config
+          config,
         ),
         axios.get(
           "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account",
-          config
+          config,
         ),
         axios.get(
           "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/work/get-work-createdList",
-          config
+          config,
         ),
       ]);
 
@@ -303,7 +303,7 @@ const HomePage = () => {
                   data: summary.warehouseDist.map((d) =>
                     d.label.length > 5
                       ? d.label.substring(0, 5) + "..."
-                      : d.label
+                      : d.label,
                   ),
                   categoryGapRatio: 0.6,
                 },

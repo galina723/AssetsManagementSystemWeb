@@ -33,7 +33,7 @@ connector.interceptors.request.use(
   (error) => {
     console.log("Interceptor Error (config):", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 connectorFile.interceptors.request.use(
@@ -52,5 +52,5 @@ connectorFile.interceptors.request.use(
   (error) => {
     console.log("Interceptor Error (config):", error);
     return Promise.reject(error);
-  }
+  },
 );

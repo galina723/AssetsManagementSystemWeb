@@ -65,7 +65,7 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
               Authorization: `Bearer ${token}`,
               "ngrok-skip-browser-warning": "true",
             },
-          }
+          },
         );
 
         if (res?.data?.data) {

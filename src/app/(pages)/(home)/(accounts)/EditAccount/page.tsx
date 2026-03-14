@@ -101,7 +101,7 @@ const EditAccountPage = () => {
               Authorization: `Bearer ${token}`,
               "ngrok-skip-browser-warning": "true",
             },
-          }
+          },
         );
 
         const a = res.data.data;
@@ -152,7 +152,7 @@ const EditAccountPage = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       alert("Update success!");

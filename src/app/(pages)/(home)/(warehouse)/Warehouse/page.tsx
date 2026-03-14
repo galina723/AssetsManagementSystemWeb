@@ -92,7 +92,7 @@ const WarehousePage = () => {
   // States for Detail Modal
   const [openDetail, setOpenDetail] = useState(false);
   const [viewingWarehouse, setViewingWarehouse] = useState<Warehouse | null>(
-    null
+    null,
   );
 
   const fetchWarehouses = async () => {
@@ -105,7 +105,7 @@ const WarehousePage = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setWarehouses(res.data.data || []);
     } catch (e) {
@@ -140,7 +140,7 @@ const WarehousePage = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setOpenDelete(false);
       setSelectedId(null);
@@ -234,7 +234,7 @@ const WarehousePage = () => {
                     key={header}
                     align={
                       ["No.", "Action", "Latitude", "Longitude"].includes(
-                        header
+                        header,
                       )
                         ? "center"
                         : "left"

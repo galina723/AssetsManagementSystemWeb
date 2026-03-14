@@ -32,7 +32,7 @@ const NotificationPage = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       console.log("DATA:", res.data);

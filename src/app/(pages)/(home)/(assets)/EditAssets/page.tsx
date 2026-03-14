@@ -84,7 +84,7 @@ const EditAssetsPage = () => {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
               "ngrok-skip-browser-warning": "true",
             },
-          }
+          },
         );
 
         const d = res.data.data;
@@ -154,7 +154,7 @@ const EditAssetsPage = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       alert("Updated successfully!");

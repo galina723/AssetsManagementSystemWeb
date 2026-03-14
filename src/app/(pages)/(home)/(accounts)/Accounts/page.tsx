@@ -88,7 +88,7 @@ export default function AccountsPage() {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       const list = Array.isArray(res.data?.data) ? res.data.data : [];
       setUsers(list);
@@ -127,7 +127,7 @@ export default function AccountsPage() {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setOpenDelete(false);
       fetchAPI();
@@ -206,7 +206,7 @@ export default function AccountsPage() {
                   >
                     {label}
                   </TableCell>
-                )
+                ),
               )}
             </TableRow>
           </TableHead>

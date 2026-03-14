@@ -34,7 +34,7 @@ export default function EditWorkPage() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       const data = res.data.data;
@@ -63,7 +63,7 @@ export default function EditWorkPage() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       setAssets(res.data.data || []);
@@ -106,7 +106,7 @@ export default function EditWorkPage() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       fetchWork();

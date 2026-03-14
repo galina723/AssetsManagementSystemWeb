@@ -90,12 +90,12 @@ const EditWarehouse = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       const data = res.data?.data || [];
       const staff = data.filter(
-        (u: any) => u.role.includes("Staff") || u.role.includes("Manager")
+        (u: any) => u.role.includes("Staff") || u.role.includes("Manager"),
       );
 
       setStaffList(staff);
@@ -117,7 +117,7 @@ const EditWarehouse = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       const data = res.data?.data;
@@ -166,7 +166,7 @@ const EditWarehouse = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       alert("Warehouse updated!");

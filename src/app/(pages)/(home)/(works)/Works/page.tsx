@@ -45,7 +45,7 @@ export default function WorkPage() {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setWorks(res.data?.data || []);
     } catch (e) {
@@ -62,7 +62,7 @@ export default function WorkPage() {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setAssets(res.data?.data || []);
     } catch (e) {
@@ -79,7 +79,7 @@ export default function WorkPage() {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setAccounts(res.data?.data || []);
     } catch (e) {
@@ -125,7 +125,7 @@ export default function WorkPage() {
         `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/work/${workToDeleteId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setOpenDeleteModal(false);
       fetchWorks();

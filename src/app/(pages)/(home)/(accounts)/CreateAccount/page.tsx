@@ -67,7 +67,7 @@ const CreateAccountPage = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       alert("Create account success!");

@@ -32,7 +32,7 @@ export default function RequestReportPage() {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setReports(res.data.data || []);
     } catch (err) {

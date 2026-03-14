@@ -128,7 +128,7 @@ const AssetsPage = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setAssets(res.data.data || []);
     } catch (err) {
@@ -155,7 +155,7 @@ const AssetsPage = () => {
         `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset/${selectedId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setOpenConfirm(false);
       fetchAssets();

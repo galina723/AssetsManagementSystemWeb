@@ -57,7 +57,7 @@ const CreateAssetsPage = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       alert("Asset created successfully!");

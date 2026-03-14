@@ -75,14 +75,14 @@ const AddWarehouse = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       const data = res.data?.data || [];
 
       // Lọc ra các user có role là Staff hoặc WarehouseManager/WarehouseStaff nếu cần
       const staff = data.filter(
-        (u: any) => u.role.includes("Staff") || u.role.includes("Manager")
+        (u: any) => u.role.includes("Staff") || u.role.includes("Manager"),
       );
 
       setStaffList(staff);
@@ -118,7 +118,7 @@ const AddWarehouse = () => {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
 
       alert("Warehouse created!");

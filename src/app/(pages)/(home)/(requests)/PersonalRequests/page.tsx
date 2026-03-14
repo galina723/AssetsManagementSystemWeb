@@ -35,7 +35,7 @@ export default function MyRequestsPage() {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
           },
-        }
+        },
       );
       setReports(res.data.data || []);
     } catch (err) {
@@ -167,7 +167,7 @@ export default function MyRequestsPage() {
                 <DetailItem
                   label="Ngày gửi"
                   value={new Date(viewingReport.createdDate).toLocaleString(
-                    "vi-VN"
+                    "vi-VN",
                   )}
                 />
                 <div>
