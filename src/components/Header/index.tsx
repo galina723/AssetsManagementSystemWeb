@@ -14,7 +14,6 @@ import {
   Typography,
   Avatar,
   Chip,
-  CircularProgress,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -41,26 +40,29 @@ const Header: FC<Props> = (props) => {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  // ✨ Tự động lấy dữ liệu khi trang vừa load
+  // Tự động fetch profile để lấy tên hiển thị ngay khi Header mount
   useEffect(() => {
-    fetchProfileData(true); // true nghĩa là chạy ngầm, không mở modal
+    fetchProfileData(true);
   }, []);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) =>
     setAnchorEl(event.currentTarget);
+
   const handleCloseMenu = () => setAnchorEl(null);
 
   const fetchProfileData = async (isSilent = false) => {
     const userStr = localStorage.getItem("user");
-    if (!userStr) return;
-
-    // Lấy ID từ Object user lưu trong localStorage {"id": 1, "fullName": "..."}
-    const userData = JSON.parse(userStr);
-    const userId = userData.id || userData.userID;
     const token = localStorage.getItem("token");
 
+    // Nếu không có thông tin user hoặc token thì thoát luôn
+    if (!userStr || !token) return;
+
     try {
+      const userData = JSON.parse(userStr);
+      const userId = userData.id || userData.userID;
+
       if (!isSilent) setLoading(true);
+
       const res = await axios.get(
         `https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account/${userId}`,
         {
@@ -70,6 +72,7 @@ const Header: FC<Props> = (props) => {
           },
         },
       );
+
       setProfileData(res.data.data);
       if (!isSilent) setOpenModal(true);
     } catch (err) {
@@ -81,27 +84,33 @@ const Header: FC<Props> = (props) => {
   };
 
   const handleLogout = () => {
-    // localStorage.clear();
-    // dispatch(addAuth(false));
-    // window.location.href = "/login";
-    localStorage.setItem("auth", "false");
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    // 1. Xóa sạch localStorage để reset trạng thái
+    localStorage.clear();
+
+    // 2. Cập nhật state Redux về false
     dispatch(addAuth(false));
-    window.location.reload();
+
+    // 3. Đóng menu UI
     setAnchorEl(null);
+
+    // 4. ✨ QUAN TRỌNG: Điều hướng về trang chủ (localhost:3000)
+    // Dùng href thay vì reload() để xóa bỏ path hiện tại (ví dụ /Works)
+    window.location.href = "/";
   };
 
-  // Hàm lấy tên hiển thị
+  // Hàm lấy tên hiển thị thông minh
   const getDisplayName = () => {
     if (profileData?.fullName) return profileData.fullName;
 
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      const user = JSON.parse(storedUser);
-      return user.fullName || user.username;
+      try {
+        const user = JSON.parse(storedUser);
+        return user.fullName || user.username || "My Account";
+      } catch {
+        return "My Account";
+      }
     }
-
     return localStorage.getItem("username") || "My Account";
   };
 
@@ -127,9 +136,13 @@ const Header: FC<Props> = (props) => {
         <Button
           startIcon={<AccountCircleIcon />}
           onClick={handleOpenMenu}
-          sx={{ textTransform: "none", fontWeight: 700, color: "#4b5563" }}
+          sx={{
+            textTransform: "none",
+            fontWeight: 700,
+            color: "#4b5563",
+            transition: "all 0.2s",
+          }}
         >
-          {/* Hiển thị tên thông minh: Ưu tiên API -> LocalStorage -> Default */}
           {getDisplayName()}
         </Button>
 
@@ -146,7 +159,10 @@ const Header: FC<Props> = (props) => {
             My Profile
           </MenuItem>
           <Divider />
-          <MenuItem onClick={handleLogout} sx={{ color: "#f43f5e" }}>
+          <MenuItem
+            onClick={handleLogout}
+            sx={{ color: "#f43f5e", fontWeight: 600 }}
+          >
             Logout
           </MenuItem>
         </Menu>
@@ -171,6 +187,7 @@ const Header: FC<Props> = (props) => {
                   mb: 2,
                   bgcolor: "#C7CEEA",
                   boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
+                  fontSize: "32px",
                 }}
               >
                 {profileData.fullName?.charAt(0)}
@@ -181,7 +198,7 @@ const Header: FC<Props> = (props) => {
               </Typography>
 
               <Chip
-                label={profileData.role}
+                label={profileData.role || "User"}
                 size="small"
                 sx={{
                   bgcolor: "#E2F0CB",
@@ -223,7 +240,7 @@ const Header: FC<Props> = (props) => {
                 <InfoItem
                   icon={<WcIcon />}
                   label="Gender"
-                  value={profileData.gender}
+                  value={profileData.gender || "N/A"}
                 />
               </Box>
             </Box>
@@ -280,7 +297,7 @@ const InfoItem = ({
     <Box>
       <Typography
         sx={{
-          fontSize: "11px",
+          fontSize: "10px",
           fontWeight: 700,
           color: "#9ca3af",
           textTransform: "uppercase",

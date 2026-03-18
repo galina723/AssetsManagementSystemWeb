@@ -36,7 +36,6 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
   const [openRequest, setOpenRequest] = useState(true);
 
   useEffect(() => {
-    // ✨ Bước 1: Check username nhanh từ localStorage để hiển thị menu Admin ngay lập tức
     const storedUsername = localStorage
       .getItem("username")
       ?.toLowerCase()
@@ -44,8 +43,6 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
     if (storedUsername === "admin") {
       setIsAdmin(true);
     }
-
-    // Bước 2: Vẫn fetch role từ API để đảm bảo tính đồng bộ dữ liệu (nếu cần)
     fetchRole(storedUsername);
   }, []);
 
@@ -54,8 +51,6 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
       const userStr = localStorage.getItem("user");
       const token = localStorage.getItem("token");
 
-      // Nếu username là admin, ta đã set isAdmin = true bên trên,
-      // nhưng fetch thêm để lấy các thông tin manager khác nếu có
       if (userStr && token) {
         const parsedUser = JSON.parse(userStr);
         const res: any = await axios.get(
@@ -72,7 +67,6 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
           const roleFromApi = res.data.data.role;
           setUserRole(roleFromApi);
 
-          // Ưu tiên: Nếu username là admin HOẶC role API trả về là Admin
           if (username === "admin" || roleFromApi === "Admin") {
             setIsAdmin(true);
           }
@@ -83,6 +77,7 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
     }
   };
 
+  // Các role Manager có quyền cao
   const isManager = [
     "GeneralManager",
     "AssetManager",
@@ -141,10 +136,7 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
       </Typography>
 
       <List component="nav" sx={{ p: 0 }}>
-        {/* Dashboard luôn có cho cả 2 */}
-
         {isAdmin ? (
-          /* 👑 MENU CHO ADMIN (USERNAME = ADMIN) */
           <ListItemButton
             component={Link}
             href="/Accounts"
@@ -156,41 +148,46 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
             <ListItemText primary="User Accounts" />
           </ListItemButton>
         ) : (
-          /* 🛠️ MENU CHO STAFF THƯỜNG */
           <>
-            <ListItemButton
-              component={Link}
-              href="/home"
-              sx={getActiveStyle("/home")}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <FaTachometerAlt />
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItemButton>
+            {/* NHÓM CHỈ DÀNH CHO MANAGER */}
+            {isManager && (
+              <>
+                <ListItemButton
+                  component={Link}
+                  href="/home"
+                  sx={getActiveStyle("/home")}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <FaTachometerAlt />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard" />
+                </ListItemButton>
 
-            <ListItemButton
-              component={Link}
-              href="/Assets"
-              sx={getActiveStyle("/Assets")}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <FaCube />
-              </ListItemIcon>
-              <ListItemText primary="Assets" />
-            </ListItemButton>
+                <ListItemButton
+                  component={Link}
+                  href="/Assets"
+                  sx={getActiveStyle("/Assets")}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <FaCube />
+                  </ListItemIcon>
+                  <ListItemText primary="Assets" />
+                </ListItemButton>
 
-            <ListItemButton
-              component={Link}
-              href="/Warehouse"
-              sx={getActiveStyle("/Warehouse")}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <FaWarehouse />
-              </ListItemIcon>
-              <ListItemText primary="Warehouse" />
-            </ListItemButton>
+                <ListItemButton
+                  component={Link}
+                  href="/Warehouse"
+                  sx={getActiveStyle("/Warehouse")}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <FaWarehouse />
+                  </ListItemIcon>
+                  <ListItemText primary="Warehouse" />
+                </ListItemButton>
+              </>
+            )}
 
+            {/* NHÓM MÀ STAFF & TECHNICAL STAFF CŨNG THẤY */}
             <ListItemButton
               component={Link}
               href="/Works"
@@ -202,7 +199,7 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
               <ListItemText primary="Work" />
             </ListItemButton>
 
-            {/* Requests logic */}
+            {/* REQUESTS LOGIC */}
             {isManager ? (
               <>
                 <ListItemButton
