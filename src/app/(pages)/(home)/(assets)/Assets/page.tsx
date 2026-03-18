@@ -14,6 +14,7 @@ import {
   FaCube,
   FaTag,
   FaMapMarkerAlt,
+  FaUserPlus, // Thêm icon mới
 } from "react-icons/fa";
 
 // Interface logic
@@ -41,9 +42,16 @@ interface AssetModel {
   isInWarehouse: boolean;
 }
 
+// Interface User mới
+interface UserModel {
+  userID: number;
+  fullName: string;
+}
+
 const mainPastelColor = "#a0c4ff";
 const mainPastelTextColor = "#3d5a80";
 const deletePastelColor = "#ffadad";
+const assignPastelColor = "#caffbf"; // Màu mới cho assign
 
 export default function AssetsPage() {
   const router = useRouter();
@@ -61,6 +69,14 @@ export default function AssetsPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [openDetailModal, setOpenDetailModal] = useState(false);
   const [viewingAsset, setViewingAsset] = useState<AssetModel | null>(null);
+
+  // States mới cho Assign
+  const [openAssignModal, setOpenAssignModal] = useState(false);
+  const [users, setUsers] = useState<UserModel[]>([]);
+  const [assignData, setAssignData] = useState({
+    userID: 0,
+    unit: 1,
+  });
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : "";
@@ -88,8 +104,24 @@ export default function AssetsPage() {
     }
   };
 
+  // Fetch users cho dropdown
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/Account`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+      setUsers(res.data.data || []);
+    } catch (err) {
+      console.error("Failed to load users");
+    }
+  };
+
   useEffect(() => {
     fetchAssets();
+    fetchUsers();
   }, []);
 
   const handleDelete = async () => {
@@ -103,6 +135,33 @@ export default function AssetsPage() {
       fetchAssets();
     } catch (err) {
       showToast("Delete failed", "error");
+    }
+  };
+
+  // Hàm handle Assign
+  const handleAssign = async () => {
+    if (assignData.userID === 0) {
+      showToast("Please select a user", "error");
+      return;
+    }
+    try {
+      await axios.post(
+        `${BASE_URL}/Asset/assign`,
+        {
+          assetID: selectedId,
+          userID: assignData.userID,
+          unit: assignData.unit,
+          assignedDate: new Date().toISOString(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      showToast("Assigned successfully");
+      setOpenAssignModal(false);
+      fetchAssets();
+    } catch (err) {
+      showToast("Assign failed", "error");
     }
   };
 
@@ -206,6 +265,22 @@ export default function AssetsPage() {
                     <td
                       style={{ ...pastelStyles.td, ...pastelStyles.actionCol }}
                     >
+                      {/* Nút Assign mới */}
+                      <button
+                        title="Assign"
+                        style={{
+                          ...pastelStyles.iconBtn,
+                          background: assignPastelColor,
+                          color: "#2d6a4f",
+                        }}
+                        onClick={() => {
+                          setSelectedId(item.assetID);
+                          setOpenAssignModal(true);
+                        }}
+                      >
+                        <FaUserPlus size={14} />
+                      </button>
+
                       <button
                         title="View"
                         style={{
@@ -290,6 +365,90 @@ export default function AssetsPage() {
           </div>
         )}
       </div>
+
+      {/* ASSIGN MODAL */}
+      {openAssignModal && (
+        <div
+          style={pastelStyles.modalOverlay}
+          onClick={() => setOpenAssignModal(false)}
+        >
+          <div
+            style={{ ...pastelStyles.modal, maxWidth: 400 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={pastelStyles.modalHeader}>
+              <h2 style={pastelStyles.modalTitle}>Assign Asset</h2>
+            </div>
+            <div style={pastelStyles.modalBody}>
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ fontSize: "14px", fontWeight: "bold" }}>
+                  Select User
+                </label>
+                <select
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "8px",
+                    marginTop: "5px",
+                  }}
+                  onChange={(e) =>
+                    setAssignData({
+                      ...assignData,
+                      userID: Number(e.target.value),
+                    })
+                  }
+                >
+                  <option value={0}>Select User</option>
+                  {users.map((u) => (
+                    <option key={u.userID} value={u.userID}>
+                      {u.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: "14px", fontWeight: "bold" }}>
+                  Units
+                </label>
+                <input
+                  type="number"
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "8px",
+                    marginTop: "5px",
+                  }}
+                  value={assignData.unit}
+                  onChange={(e) =>
+                    setAssignData({
+                      ...assignData,
+                      unit: Number(e.target.value),
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <div style={pastelStyles.modalActions}>
+              <button
+                style={pastelStyles.cancelBtn}
+                onClick={() => setOpenAssignModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  ...pastelStyles.saveBtn,
+                  backgroundColor: assignPastelColor,
+                  color: "#2d6a4f",
+                }}
+                onClick={handleAssign}
+              >
+                Assign
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DETAIL MODAL */}
       {openDetailModal && viewingAsset && (

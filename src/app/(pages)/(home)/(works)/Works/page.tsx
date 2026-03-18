@@ -5,19 +5,27 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import {
   FaTrash,
+  FaEdit,
   FaEye,
   FaPlus,
   FaChevronLeft,
   FaChevronRight,
   FaExclamationCircle,
-  FaTasks,
-  FaUser,
-  FaCalendarAlt,
+  FaInfoCircle,
+  FaTag,
 } from "react-icons/fa";
 
 const mainPastelColor = "#a0c4ff";
 const mainPastelTextColor = "#3d5a80";
 const deletePastelColor = "#ffadad";
+
+// Mapping enum từ Backend
+const WorkStatusConfig: Record<number, { label: string; class: string }> = {
+  0: { label: "New", class: "status-new" },
+  1: { label: "In Progress", class: "status-inprogress" },
+  2: { label: "Completed", class: "status-completed" },
+  3: { label: "Cancelled", class: "status-cancelled" },
+};
 
 export default function WorkPage() {
   const [works, setWorks] = useState<any[]>([]);
@@ -34,6 +42,19 @@ export default function WorkPage() {
   const [workToDeleteId, setWorkToDeleteId] = useState<number | null>(null);
   const [openDetailModal, setOpenDetailModal] = useState(false);
   const [viewingWork, setViewingWork] = useState<any>(null);
+
+  // Edit States
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    workID: 0,
+    assetID: 0,
+    name: "",
+    dueDate: "",
+    description: "",
+    status: 0,
+    assignedUserID: 0,
+    assignedStaffIds: [] as number[],
+  });
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,8 +99,49 @@ export default function WorkPage() {
   // Helpers
   const findAssetName = (id: any) =>
     assets.find((a) => a.assetID === id)?.name || "Unknown Asset";
-  const findCreatorName = (userId: any) =>
-    accounts.find((acc) => acc.userID === userId)?.fullName || "Unknown User";
+
+  // Actions
+  const openEdit = (item: any) => {
+    // Tìm index của status dựa trên label trả về từ API hoặc dùng trực tiếp nếu API trả về số
+    let currentStatus = 0;
+    if (typeof item.status === "number") {
+      currentStatus = item.status;
+    } else {
+      const statusEntry = Object.entries(WorkStatusConfig).find(
+        ([_, v]) => v.label === item.status,
+      );
+      currentStatus = statusEntry ? parseInt(statusEntry[0]) : 0;
+    }
+
+    setEditFormData({
+      workID: item.workID,
+      assetID: item.assetID,
+      name: item.name,
+      dueDate: item.dueDate ? item.dueDate.slice(0, 16) : "",
+      description: item.description || "",
+      status: currentStatus,
+      assignedUserID: item.assignedUserID || 0,
+      assignedStaffIds: item.assignedStaffs?.map((s: any) => s.userID) || [],
+    });
+    setOpenEditModal(true);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      await axios.put(`${BASE_URL}/Work/${editFormData.workID}`, editFormData, {
+        headers,
+      });
+      showToast("Work updated successfully!");
+      setOpenEditModal(false);
+      fetchData();
+    } catch (e) {
+      showToast("Update failed", "error");
+    }
+  };
 
   const handleDelete = async () => {
     if (!workToDeleteId) return;
@@ -95,15 +157,11 @@ export default function WorkPage() {
     }
   };
 
-  // Pagination Calculations
-  const totalPages = Math.ceil(works.length / ITEMS_PER_PAGE);
   const currentWorks = works.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
-
-  if (loading)
-    return <div style={pastelStyles.loadingContainer}>Loading works...</div>;
+  const totalPages = Math.ceil(works.length / ITEMS_PER_PAGE);
 
   return (
     <div style={pastelStyles.container}>
@@ -119,9 +177,7 @@ export default function WorkPage() {
       )}
 
       <div style={pastelStyles.header}>
-        <div>
-          <h1 style={pastelStyles.title}>Work Management</h1>
-        </div>
+        <h1 style={pastelStyles.title}>Work Management</h1>
         <button
           onClick={() => router.push("/CreateWork")}
           style={pastelStyles.addBtn}
@@ -147,7 +203,17 @@ export default function WorkPage() {
             </thead>
             <tbody>
               {currentWorks.map((item, index) => {
-                const seq = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+                // Xác định class CSS cho status
+                let statusInfo = WorkStatusConfig[0];
+                if (typeof item.status === "number") {
+                  statusInfo = WorkStatusConfig[item.status];
+                } else {
+                  statusInfo =
+                    Object.values(WorkStatusConfig).find(
+                      (v) => v.label === item.status,
+                    ) || WorkStatusConfig[0];
+                }
+
                 return (
                   <tr key={item.workID} className="table-row-style">
                     <td
@@ -157,7 +223,7 @@ export default function WorkPage() {
                         color: "#64748b",
                       }}
                     >
-                      {seq}
+                      {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                     </td>
                     <td style={{ ...pastelStyles.td, fontWeight: 600 }}>
                       {item.name}
@@ -169,17 +235,14 @@ export default function WorkPage() {
                       {item.dueDate?.slice(0, 10)}
                     </td>
                     <td style={pastelStyles.td}>
-                      <span
-                        className={`status-tag ${item.status?.toLowerCase().replace(" ", "-")}`}
-                      >
-                        {item.status || "N/A"}
+                      <span className={`status-tag ${statusInfo.class}`}>
+                        {statusInfo.label}
                       </span>
                     </td>
                     <td
                       style={{ ...pastelStyles.td, ...pastelStyles.actionCol }}
                     >
                       <button
-                        title="View detail"
                         style={{
                           ...pastelStyles.iconBtn,
                           background: "#e0f2fe",
@@ -193,7 +256,16 @@ export default function WorkPage() {
                         <FaEye size={14} />
                       </button>
                       <button
-                        title="Delete work"
+                        style={{
+                          ...pastelStyles.iconBtn,
+                          background: "#fef3c7",
+                          color: "#92400e",
+                        }}
+                        onClick={() => openEdit(item)}
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      <button
                         style={{
                           ...pastelStyles.iconBtn,
                           background: deletePastelColor,
@@ -213,44 +285,148 @@ export default function WorkPage() {
             </tbody>
           </table>
         </div>
-
-        {/* PAGINATION */}
-        {totalPages > 1 && (
-          <div style={pastelStyles.pagination}>
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-              style={pastelStyles.pageBtn}
-            >
-              <FaChevronLeft />
-            </button>
-            <div style={{ display: "flex", gap: 5 }}>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  style={{
-                    ...pastelStyles.pageBtn,
-                    backgroundColor:
-                      currentPage === i + 1 ? mainPastelColor : "#fff",
-                  }}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-              style={pastelStyles.pageBtn}
-            >
-              <FaChevronRight />
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* VIEW DETAIL MODAL */}
+      {/* EDIT MODAL */}
+      {openEditModal && (
+        <div
+          style={pastelStyles.modalOverlay}
+          onClick={() => setOpenEditModal(false)}
+        >
+          <div
+            style={{ ...pastelStyles.modal, maxWidth: 600 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={pastelStyles.modalHeader}>
+              <h2 style={pastelStyles.modalTitle}>Edit Work Request</h2>
+            </div>
+            <div
+              style={{
+                ...pastelStyles.modalBody,
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+              }}
+            >
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={pastelStyles.label}>Work Name</label>
+                <input
+                  style={pastelStyles.input}
+                  value={editFormData.name}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, name: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label style={pastelStyles.label}>Target Asset</label>
+                <select
+                  style={pastelStyles.input}
+                  value={editFormData.assetID}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      assetID: Number(e.target.value),
+                    })
+                  }
+                >
+                  {assets.map((a) => (
+                    <option key={a.assetID} value={a.assetID}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={pastelStyles.label}>Due Date</label>
+                <input
+                  type="datetime-local"
+                  style={pastelStyles.input}
+                  value={editFormData.dueDate}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      dueDate: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label style={pastelStyles.label}>Status</label>
+                <select
+                  style={pastelStyles.input}
+                  value={editFormData.status}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      status: Number(e.target.value),
+                    })
+                  }
+                >
+                  {Object.entries(WorkStatusConfig).map(([key, val]) => (
+                    <option key={key} value={key}>
+                      {val.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={pastelStyles.label}>Responsible User</label>
+                <select
+                  style={pastelStyles.input}
+                  value={editFormData.assignedUserID}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      assignedUserID: Number(e.target.value),
+                    })
+                  }
+                >
+                  <option value={0}>Select User</option>
+                  {accounts.map((acc) => (
+                    <option key={acc.userID} value={acc.userID}>
+                      {acc.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={pastelStyles.label}>Description</label>
+                <textarea
+                  style={{ ...pastelStyles.input, minHeight: 80 }}
+                  value={editFormData.description}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      description: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <div style={pastelStyles.modalActions}>
+              <button
+                style={pastelStyles.cancelBtn}
+                onClick={() => setOpenEditModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  ...pastelStyles.saveBtn,
+                  background: mainPastelColor,
+                  color: mainPastelTextColor,
+                }}
+                onClick={handleUpdate}
+              >
+                Update Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DETAIL MODAL */}
       {openDetailModal && viewingWork && (
         <div
           style={pastelStyles.modalOverlay}
@@ -258,7 +434,7 @@ export default function WorkPage() {
         >
           <div style={pastelStyles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={pastelStyles.modalHeader}>
-              <h2 style={pastelStyles.modalTitle}>Work Details</h2>
+              <h2 style={pastelStyles.modalTitle}>Work Detail View</h2>
             </div>
             <div style={pastelStyles.modalBody}>
               <div style={pastelStyles.detailItem}>
@@ -268,12 +444,8 @@ export default function WorkPage() {
                 <strong>Asset:</strong> {findAssetName(viewingWork.assetID)}
               </div>
               <div style={pastelStyles.detailItem}>
-                <strong>Creator:</strong>{" "}
-                {findCreatorName(viewingWork.createdBy)}
-              </div>
-              <div style={pastelStyles.detailItem}>
                 <strong>Due Date:</strong>{" "}
-                {new Date(viewingWork.dueDate).toLocaleDateString()}
+                {new Date(viewingWork.dueDate).toLocaleString()}
               </div>
               <div style={pastelStyles.detailItem}>
                 <strong>Status:</strong> {viewingWork.status}
@@ -288,7 +460,7 @@ export default function WorkPage() {
               >
                 <strong>Description:</strong>
                 <br />
-                {viewingWork.description || "No description provided."}
+                {viewingWork.description || "No description."}
               </div>
             </div>
             <div style={pastelStyles.modalActions}>
@@ -303,7 +475,7 @@ export default function WorkPage() {
         </div>
       )}
 
-      {/* DELETE CONFIRM MODAL */}
+      {/* DELETE MODAL */}
       {openDeleteModal && (
         <div
           style={pastelStyles.modalOverlay}
@@ -319,9 +491,9 @@ export default function WorkPage() {
                 color={deletePastelColor}
                 style={{ marginBottom: 15 }}
               />
-              <h3>Delete Work?</h3>
+              <h3>Confirm Deletion</h3>
               <p style={{ fontSize: 14, color: "#64748b" }}>
-                This task will be permanently removed.
+                Remove this task from the system?
               </p>
             </div>
             <div style={pastelStyles.modalActions}>
@@ -329,7 +501,7 @@ export default function WorkPage() {
                 style={pastelStyles.cancelBtn}
                 onClick={() => setOpenDeleteModal(false)}
               >
-                Cancel
+                No
               </button>
               <button
                 style={{
@@ -339,7 +511,7 @@ export default function WorkPage() {
                 }}
                 onClick={handleDelete}
               >
-                Delete
+                Yes, Delete
               </button>
             </div>
           </div>
@@ -357,17 +529,21 @@ export default function WorkPage() {
           font-weight: 700;
           text-transform: uppercase;
         }
-        .status-tag.new {
+        .status-new {
           background: #e0e7ff;
           color: #4338ca;
         }
-        .status-tag.completed {
+        .status-inprogress {
+          background: #fef3c7;
+          color: #92400e;
+        }
+        .status-completed {
           background: #dcfce7;
           color: #15803d;
         }
-        .status-tag.in-progress {
-          background: #fef3c7;
-          color: #92400e;
+        .status-cancelled {
+          background: #fee2e2;
+          color: #b91c1c;
         }
       `}</style>
     </div>
@@ -400,7 +576,6 @@ const pastelStyles: any = {
     marginBottom: "20px",
   },
   title: { fontSize: "28px", fontWeight: "800", color: mainPastelTextColor },
-  subtitle: { fontSize: "14px", color: "#8e9aaf", margin: 0 },
   addBtn: {
     background: mainPastelColor,
     color: mainPastelTextColor,
@@ -453,20 +628,6 @@ const pastelStyles: any = {
     alignItems: "center",
     justifyContent: "center",
   },
-  pagination: {
-    padding: "15px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "10px",
-  },
-  pageBtn: {
-    background: "#fff",
-    border: "1px solid #e2e8f0",
-    padding: "5px 10px",
-    borderRadius: "8px",
-    cursor: "pointer",
-  },
   modalOverlay: {
     position: "fixed",
     inset: 0,
@@ -480,7 +641,6 @@ const pastelStyles: any = {
   modal: {
     background: "white",
     width: "90%",
-    maxWidth: "500px",
     borderRadius: "20px",
     overflow: "hidden",
     boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
@@ -492,7 +652,23 @@ const pastelStyles: any = {
   },
   modalTitle: { margin: 0, fontSize: "18px", color: mainPastelTextColor },
   modalBody: { padding: "20px" },
-  detailItem: { marginBottom: "12px", fontSize: "14px", color: "#334155" },
+  label: {
+    display: "block",
+    marginBottom: "5px",
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#64748b",
+    textTransform: "uppercase",
+  },
+  input: {
+    width: "100%",
+    padding: "10px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    marginBottom: "10px",
+    outline: "none",
+    fontSize: "14px",
+  },
   modalActions: {
     padding: "15px 20px",
     display: "flex",
