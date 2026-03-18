@@ -1,157 +1,166 @@
 "use client";
 
-import { Button, IconButton, TextField } from "@mui/material";
-import React from "react";
-import SaveIcon from "@mui/icons-material/Save";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import React, { useState } from "react";
+import axios from "axios";
 import { useRouter } from "next/navigation";
-import { DynamicModel } from "@/models/dynamicModel";
-import Dropdown from "@/components/Dropdown";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { DatePicker } from "@mui/x-date-pickers";
+import SaveIcon from "@mui/icons-material/Save"; // Thêm icon Save
 
 const CreateAssetsPage = () => {
   const router = useRouter();
 
-  const departmentData: DynamicModel[] = [
-    {
-      name: "Lab department",
-      value: "Lab department",
-    },
-    {
-      name: "HR department",
-      value: "HR department",
-    },
-    {
-      name: "Fixing department",
-      value: "Fixing department",
-    },
-  ];
+  const [form, setForm] = useState({
+    name: "",
+    code: "",
+    position: "",
+    dateOfPurchase: "",
+    price: "",
+    unit: "",
+    currency: "",
+    note: "",
+    purpose: "",
+    supplier: "",
+    quantity: "",
+    warrantyDuration: "",
+    warrantyDepartment: "",
+    latitude: "",
+    longitude: "",
+  });
 
-  const userData: DynamicModel[] = [
-    {
-      name: "Nguyen Van A",
-      value: "Nguyen Van A",
-    },
-    {
-      name: "Nguyen Thi C",
-      value: "Nguyen Thi C",
-    },
-    {
-      name: "Tran Van D",
-      value: "Tran Van D",
-    },
-  ];
+  const updateField = (field: string, value: any) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const unitData: DynamicModel[] = [
-    {
-      name: "VND",
-      value: "VND",
-    },
-    {
-      name: "USD",
-      value: "USD",
-    },
-  ];
+  const handleSave = async () => {
+    try {
+      // Đảm bảo tất cả các trường số được parse đúng cách, nếu không phải số thì set là 0
+      const parseNumber = (value: string) =>
+        isNaN(Number(value)) ? 0 : Number(value);
+
+      const body = {
+        ...form,
+        code: parseNumber(form.code),
+        price: parseNumber(form.price),
+        quantity: parseNumber(form.quantity),
+        warrantyDuration: parseNumber(form.warrantyDuration),
+        latitude: parseNumber(form.latitude),
+        longitude: parseNumber(form.longitude),
+        dateOfPurchase: form.dateOfPurchase
+          ? new Date(form.dateOfPurchase).toISOString()
+          : null, // Xử lý trường ngày
+      };
+
+      const res = await axios.post(
+        "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset",
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "ngrok-skip-browser-warning": "true",
+          },
+        },
+      );
+
+      alert("Asset created successfully!");
+      router.push("/Assets");
+    } catch (err) {
+      console.log(err);
+      alert("Create asset failed!");
+    }
+  };
 
   return (
-    <div className="assets-page">
-      <div className="assets-page__header">
-        <div className="assets-page__header__title assets-page__header__title__group">
-          <IconButton onClick={() => router.push("/Assets")}>
-            <ArrowBackIcon />
-          </IconButton>
-          <span>Create Assets</span>
-        </div>
-        <div className="assets-page__header__group">
-          <Button
-            startIcon={<SaveIcon />}
-            variant="contained"
-            onClick={() => {}}
-          >
-            Save
-          </Button>
-        </div>
+    <div style={pastelStyles.page}>
+      <div style={pastelStyles.header}>
+        <h1 style={pastelStyles.title}> Create New Asset</h1>
+
+        {/* SAVE BUTTON - Dùng style Pastel Nổi bật */}
+        <button style={pastelStyles.saveBtn} onClick={handleSave}>
+          <SaveIcon style={pastelStyles.saveIcon} />
+          Save Asset
+        </button>
       </div>
 
-      <div
-        className="assets-page__container"
-        style={{ height: "calc(100vh - (64px + 24px + 64px + 24px + 64px))" }}
-      >
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Device name:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Code: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Currency:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">User: </span>
-          <Dropdown listData={userData} />
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Department:{" "}
-          </span>
-          <Dropdown listData={departmentData} />
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Date Of Purchase:{" "}
-          </span>
-          <div className="date-picker">
-            <DemoContainer components={["DatePicker"]}>
-              <DatePicker label="Choose date" />
-            </DemoContainer>
+      {/* Form Container */}
+      <div style={pastelStyles.card}>
+        <div style={pastelStyles.formGrid}>
+          {/** LEFT COLUMN */}
+          <div style={pastelStyles.column}>
+            <Input
+              label="Name"
+              value={form.name}
+              onChange={(v) => updateField("name", v)}
+            />
+            <Input
+              label="Code"
+              value={form.code}
+              onChange={(v) => updateField("code", v)}
+            />
+            <Input
+              label="Position"
+              value={form.position}
+              onChange={(v) => updateField("position", v)}
+            />
+            <Input
+              label="Date of Purchase"
+              type="date"
+              value={form.dateOfPurchase}
+              onChange={(v) => updateField("dateOfPurchase", v)}
+            />
+            <Input
+              label="Price"
+              value={form.price}
+              onChange={(v) => updateField("price", v)}
+            />
+            <Input
+              label="Unit"
+              value={form.unit}
+              onChange={(v) => updateField("unit", v)}
+            />
+            <Input
+              label="Currency"
+              value={form.currency}
+              onChange={(v) => updateField("currency", v)}
+            />
           </div>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Quantity:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Price: </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Unit: </span>
-          <Dropdown listData={unitData} />
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">Note: </span>
-          <TextField
-            multiline
-            className="assets-page__container__group--input"
-          ></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Purpose:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Guarantee Condition:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
-        </div>
-        <div className="assets-page__container__group">
-          <span className="assets-page__container__group--label">
-            Supplier:{" "}
-          </span>
-          <TextField className="assets-page__container__group--input"></TextField>
+
+          {/** RIGHT COLUMN */}
+          <div style={pastelStyles.column}>
+            <Input
+              label="Purpose"
+              value={form.purpose}
+              onChange={(v) => updateField("purpose", v)}
+            />
+            <Input
+              label="Supplier"
+              value={form.supplier}
+              onChange={(v) => updateField("supplier", v)}
+            />
+            <Input
+              label="Quantity"
+              value={form.quantity}
+              onChange={(v) => updateField("quantity", v)}
+            />
+            <Input
+              label="Warranty Duration"
+              value={form.warrantyDuration}
+              onChange={(v) => updateField("warrantyDuration", v)}
+            />
+            <Input
+              label="Warranty Department"
+              value={form.warrantyDepartment}
+              onChange={(v) => updateField("warrantyDepartment", v)}
+            />
+            <Input
+              label="Latitude"
+              value={form.latitude}
+              onChange={(v) => updateField("latitude", v)}
+            />
+            <Input
+              label="Longitude"
+              value={form.longitude}
+              onChange={(v) => updateField("longitude", v)}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -159,3 +168,124 @@ const CreateAssetsPage = () => {
 };
 
 export default CreateAssetsPage;
+
+const Input = ({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: any;
+  onChange: (v: any) => void;
+  type?: string;
+}) => (
+  <div style={pastelStyles.inputGroup}>
+    <label style={pastelStyles.label}>{label}</label>
+    <input
+      style={pastelStyles.input}
+      value={value}
+      type={type}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  </div>
+);
+
+// ============================
+// 🔥 PASTE L STYLE
+// ============================
+const mainPastelColor = "#a0c4ff"; // Xanh pastel
+const mainPastelHoverColor = "#b8cffc";
+const mainPastelTextColor = "#3d5a80"; // Màu chữ tối nhẹ
+
+const pastelStyles: any = {
+  page: {
+    padding: "32px",
+    background: "#fcfcfc",
+    minHeight: "100vh",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "30px", // Tăng khoảng cách
+  },
+  title: {
+    fontSize: "28px",
+    fontWeight: 700,
+    color: mainPastelTextColor,
+    textShadow: "0 1px 2px rgba(0,0,0,0.05)",
+  },
+  card: {
+    background: "white",
+    padding: "40px", // Tăng padding
+    borderRadius: "16px", // Bo góc mềm mại
+    boxShadow: "0 4px 16px rgba(160, 196, 255, 0.1)", // Shadow pastel nhẹ
+    border: "1px solid #e0e7f2",
+  },
+  formGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "40px", // Tăng gap lớn hơn cho thoáng
+  },
+  column: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px", // Tăng gap giữa các input
+  },
+  inputGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  label: {
+    fontSize: "14px",
+    fontWeight: 600,
+    color: "#5c677d", // Màu label dịu nhẹ
+  },
+  input: {
+    padding: "10px 14px",
+    borderRadius: "10px",
+    border: `1px solid ${mainPastelColor}`, // Border màu pastel
+    backgroundColor: "#f7f9fc", // Nền input màu sáng
+    fontSize: "15px",
+    color: "#333",
+    transition: "0.2s",
+    "&:focus": {
+      outline: "none",
+      borderColor: mainPastelHoverColor,
+      boxShadow: "0 0 0 3px rgba(160, 196, 255, 0.5)", // Focus shadow
+    },
+  },
+  saveBtn: {
+    // Style Pastel Nổi bật
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    fontWeight: 700,
+    borderRadius: "12px",
+    padding: "14px 30px",
+    fontSize: "1rem",
+
+    background: `linear-gradient(145deg, ${mainPastelHoverColor}, ${mainPastelColor})`,
+    color: mainPastelTextColor,
+
+    boxShadow: "0 6px 15px rgba(160, 196, 255, 0.4)",
+    border: "none",
+    cursor: "pointer",
+
+    // Đặt ngoài lưới/sau header
+    marginLeft: "auto",
+    transition: "all 0.3s ease-in-out",
+
+    "&:hover": {
+      background: `linear-gradient(145deg, ${mainPastelColor}, ${mainPastelHoverColor})`,
+      boxShadow: "0 8px 20px rgba(160, 196, 255, 0.6)",
+      transform: "translateY(-1px)",
+    },
+  },
+  saveIcon: {
+    fontSize: 20,
+  },
+};
