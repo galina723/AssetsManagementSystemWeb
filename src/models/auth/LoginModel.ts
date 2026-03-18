@@ -2,9 +2,7 @@
 //   id: number;
 //   username: string;
 //   password: string;
-// }
-
-import { User as UserT } from "../user/UserModel";
+import { User as UserT } from "../user/UserModel"; // }
 
 // API Response Types
 export interface ApiResponse<T = unknown> {
