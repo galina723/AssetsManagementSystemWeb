@@ -3,7 +3,7 @@
 import { authSelector } from "@/redux/reducers/authReducer";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import LoginPage from "./(auth)/(Login)/page";
+import LoginPage from "./(auth)/(login)/page";
 
 export default function HomeLayout({
   children,
