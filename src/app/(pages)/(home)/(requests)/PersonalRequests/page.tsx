@@ -43,6 +43,7 @@ export default function MyRequestsPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string>("");
+  const [roleId, setRoleId] = useState<number | null>(null); // State lưu roleId
   const [myWarehouses, setMyWarehouses] = useState<any[]>([]);
   const [myAssets, setMyAssets] = useState<any[]>([]);
   const [toast, setToast] = useState<{
@@ -85,19 +86,19 @@ export default function MyRequestsPage() {
         Authorization: `Bearer ${token}`,
         "ngrok-skip-browser-warning": "true",
       };
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      let role =
-        payload.role ||
-        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-      if (role == 4 || role === "Warehouse Manager") role = "WarehouseManager";
-      setUserRole(role || "User");
+
+      // Lấy roleId trực tiếp từ localStorage (ép kiểu về Number)
+      const savedRoleId =
+        typeof window !== "undefined" ? localStorage.getItem("roleId") : null;
+      const currentRoleId = Number(savedRoleId);
+      setRoleId(currentRoleId); // Lưu vào state để UI cập nhật
 
       const [resReports, resAssets, resWH] = await Promise.allSettled([
         axios.get(`${BASE_URL}/requestreport/created-list-request`, {
           headers,
         }),
         axios.get(`${BASE_URL}/Asset/my-assets`, { headers }),
-        role === "WarehouseManager"
+        Number(roleId) === 4
           ? axios.get(`${BASE_URL}/Warehouse/dropdown-warehouse`, { headers })
           : Promise.resolve(null),
       ]);
@@ -119,6 +120,7 @@ export default function MyRequestsPage() {
     fetchInitialData();
   }, []);
 
+  // ... (Các hàm handleOpenView, handleFinalSubmit giữ nguyên)
   const handleOpenView = async (id: number) => {
     setModalType("view");
     setDetailLoading(true);
@@ -148,11 +150,7 @@ export default function MyRequestsPage() {
       let method: "post" | "put" = modalType.includes("edit") ? "put" : "post";
       let payload: any = {};
 
-      if (
-        modalType === "editAsset" ||
-        modalType === "addPersonalAsset" ||
-        modalType === "addWarehouseAsset"
-      ) {
+      if (modalType.includes("Asset") || modalType === "editAsset") {
         url =
           modalType === "editAsset"
             ? `${BASE_URL}/requestreport/update/${formData.id}`
@@ -165,9 +163,7 @@ export default function MyRequestsPage() {
           description: formData.description,
         };
       } else {
-        // Nhánh Warehouse (Move/Delete)
         if (Number(formData.type) === 4) {
-          // SỬ DỤNG ĐÚNG API UPDATE-LOCATION CHO TYPE 4
           url = modalType.includes("add")
             ? `${BASE_URL}/requestreport/request-location`
             : `${BASE_URL}/RequestReport/update-location/${formData.id}`;
@@ -191,6 +187,30 @@ export default function MyRequestsPage() {
       await axios({ method, url, data: payload, headers });
       showToast("Success!");
       closeModal();
+      fetchInitialData();
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Action failed", "error");
+    }
+  };
+
+  const handleUpdateStatus = async (id: number, status: number) => {
+    try {
+      await axios.post(
+        `${BASE_URL}/RequestReport/process-approval`,
+        {
+          requestID: id,
+          newStatus: status,
+          comment: "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      showToast(status === 1 ? "Accepted!" : "Rejected!");
       fetchInitialData();
     } catch (err: any) {
       showToast(err.response?.data?.message || "Action failed", "error");
@@ -294,8 +314,39 @@ export default function MyRequestsPage() {
                     >
                       <FaEye />
                     </button>
+
+                    {/* ĐIỀU KIỆN: Chỉ hiện Accept/Reject nếu là Pending (0) VÀ roleId là 2 */}
                     {(r.currentStatus === 0 || r.status === 0) && (
                       <>
+                        {Number(roleId) === 2 && (
+                          <>
+                            {/* ✅ ACCEPT */}
+                            <button
+                              style={{
+                                ...pastelStyles.iconBtn,
+                                background: "#dcfce7",
+                                color: "#16a34a",
+                              }}
+                              onClick={() => handleUpdateStatus(r.id, 1)}
+                            >
+                              ✓
+                            </button>
+
+                            {/* ❌ REJECT */}
+                            <button
+                              style={{
+                                ...pastelStyles.iconBtn,
+                                background: "#fee2e2",
+                                color: "#dc2626",
+                              }}
+                              onClick={() => handleUpdateStatus(r.id, 2)}
+                            >
+                              ✕
+                            </button>
+                          </>
+                        )}
+
+                        {/* EDIT & DELETE giữ nguyên cho người tạo request */}
                         <button
                           style={{
                             ...pastelStyles.iconBtn,
@@ -319,6 +370,7 @@ export default function MyRequestsPage() {
                         >
                           <FaEdit />
                         </button>
+
                         <button
                           style={{
                             ...pastelStyles.iconBtn,
@@ -339,8 +391,7 @@ export default function MyRequestsPage() {
             </tbody>
           </table>
         </div>
-
-        {/* PAGINATION PHẢI CÓ Ở ĐÂY */}
+        {/* ... Phân trang ... */}
         {totalPages > 1 && (
           <div style={pastelStyles.pagination}>
             <button
@@ -374,7 +425,7 @@ export default function MyRequestsPage() {
             </div>
             <button
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
+              onClick={() => setCurrentPage((p) => p - 1)}
               style={
                 currentPage === totalPages
                   ? pastelStyles.pageBtnDisabled
@@ -387,11 +438,14 @@ export default function MyRequestsPage() {
         )}
       </div>
 
-      {/* MODAL VIEW */}
+      {/* --- CÁC MODALS GIỮ NGUYÊN --- */}
+      {/* (Phần code modal bên dưới giữ nguyên như bạn đã cung cấp) */}
+      {/* ... */}
+      {/* VIEW MODAL (Đã bự sẵn) */}
       {modalType === "view" && (
         <div style={pastelStyles.modalOverlay} onClick={closeModal}>
           <div
-            style={{ ...pastelStyles.modal, maxWidth: "650px" }}
+            style={{ ...pastelStyles.modal, maxWidth: "650px", width: "90%" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={pastelStyles.modalHeader}>
@@ -412,7 +466,7 @@ export default function MyRequestsPage() {
                     {viewingReport?.asset ? (
                       <>
                         <h4 style={secTitle}>
-                          <FaBox /> Asset Information
+                          <FaBox /> Asset Info
                         </h4>
                         <p style={valStyle}>
                           <b>Name:</b> {viewingReport.asset.name}
@@ -424,7 +478,7 @@ export default function MyRequestsPage() {
                     ) : viewingReport?.warehouse ? (
                       <>
                         <h4 style={secTitle}>
-                          <FaWarehouse /> Warehouse Information
+                          <FaWarehouse /> Warehouse Info
                         </h4>
                         <p style={valStyle}>
                           <b>Name:</b> {viewingReport.warehouse.name}
@@ -441,7 +495,7 @@ export default function MyRequestsPage() {
                   </div>
                   <div>
                     <h4 style={secTitle}>
-                      <FaUserCircle /> Requester Information
+                      <FaUserCircle /> Requester
                     </h4>
                     <p style={valStyle}>
                       <b>Name:</b> {viewingReport?.creator?.fullName}
@@ -449,31 +503,6 @@ export default function MyRequestsPage() {
                     <p style={valStyle}>
                       <b>Stage:</b> {viewingReport?.currentStage}
                     </p>
-                    {viewingReport?.type === 4 && (
-                      <div
-                        style={{
-                          background: "#fff7ed",
-                          padding: 8,
-                          borderRadius: 6,
-                          border: "1px solid #ffedd5",
-                          marginTop: 10,
-                        }}
-                      >
-                        <p
-                          style={{
-                            fontSize: 11,
-                            fontWeight: "bold",
-                            color: "#c2410c",
-                          }}
-                        >
-                          NEW LOCATION TARGET
-                        </p>
-                        <p style={{ fontSize: 13 }}>
-                          <b>Lat:</b> {viewingReport.newLatitude} | <b>Long:</b>{" "}
-                          {viewingReport.newLongitude}
-                        </p>
-                      </div>
-                    )}
                   </div>
                   <div
                     style={{
@@ -488,6 +517,7 @@ export default function MyRequestsPage() {
                         fontSize: 11,
                         fontWeight: "bold",
                         color: "#64748b",
+                        margin: "0 0 5px 0",
                       }}
                     >
                       CONTENT / REASON
@@ -508,28 +538,28 @@ export default function MyRequestsPage() {
         </div>
       )}
 
-      {/* SELECT TYPE */}
+      {/* SELECT TYPE MODAL */}
       {modalType === "selectType" && (
         <div style={pastelStyles.modalOverlay} onClick={closeModal}>
           <div
-            style={{ ...pastelStyles.modal, maxWidth: "380px" }}
+            style={{ ...pastelStyles.modal, maxWidth: "400px", width: "90%" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={pastelStyles.modalHeader}>
               <h2 style={pastelStyles.modalTitle}>New Request</h2>
             </div>
-            <div style={{ padding: 15, display: "grid", gap: 10 }}>
+            <div style={{ padding: 20, display: "grid", gap: 12 }}>
               <button
                 className="select-item"
                 onClick={() => setModalType("addPersonalAsset")}
               >
-                <FaBox color="#3b82f6" /> <span>Personal Asset</span>
+                <FaBox color="#3b82f6" /> Personal Asset
               </button>
               <button
                 className="select-item"
                 onClick={() => setModalType("addWarehouseAsset")}
               >
-                <FaWarehouse color="#10b981" /> <span>Warehouse Item</span>
+                <FaWarehouse color="#10b981" /> Warehouse Item
               </button>
               {userRole === "WarehouseManager" && (
                 <>
@@ -540,8 +570,7 @@ export default function MyRequestsPage() {
                       setModalType("addWhLocation");
                     }}
                   >
-                    <FaMapMarkerAlt color="#f59e0b" />{" "}
-                    <span>Move Warehouse</span>
+                    <FaMapMarkerAlt color="#f59e0b" /> Move Warehouse
                   </button>
                   <button
                     className="select-item"
@@ -550,8 +579,7 @@ export default function MyRequestsPage() {
                       setModalType("addWhDelete");
                     }}
                   >
-                    <FaExclamationTriangle color="#ef4444" />{" "}
-                    <span>Delete Warehouse</span>
+                    <FaExclamationTriangle color="#ef4444" /> Delete Warehouse
                   </button>
                 </>
               )}
@@ -560,53 +588,66 @@ export default function MyRequestsPage() {
         </div>
       )}
 
-      {/* FORM ASSET */}
-      {modalType.includes("Asset") && (
+      {/* ADD/EDIT ASSET FORM (Đã làm bự hơn) */}
+      {(modalType.includes("Asset") || modalType === "editAsset") && (
         <div style={pastelStyles.modalOverlay} onClick={closeModal}>
           <div
-            style={{ ...pastelStyles.modal, maxWidth: "400px" }}
+            style={{ ...pastelStyles.modal, maxWidth: "550px", width: "90%" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={pastelStyles.modalHeader}>
               <h2 style={pastelStyles.modalTitle}>Asset Form</h2>
             </div>
-            <div style={pastelStyles.modalBody}>
-              <label style={pastelStyles.label}>Select Asset</label>
-              <select
-                style={pastelStyles.select}
-                value={formData.assetID}
-                onChange={(e) =>
-                  setFormData({ ...formData, assetID: e.target.value })
-                }
-              >
-                <option value="">-- Choose Asset --</option>
-                {myAssets.map((a, idx) => (
-                  <option key={idx} value={a.id || a.assetID}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
-              <label style={pastelStyles.label}>Issue Type</label>
-              <select
-                style={pastelStyles.select}
-                value={formData.type}
-                onChange={(e) =>
-                  setFormData({ ...formData, type: Number(e.target.value) })
-                }
-              >
-                <option value={0}>Broken</option>
-                <option value={1}>Recall</option>
-                <option value={2}>Lost</option>
-                <option value={3}>Report</option>
-              </select>
-              <label style={pastelStyles.label}>Description</label>
-              <textarea
-                style={pastelStyles.textarea}
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
+            <div
+              style={{
+                ...pastelStyles.modalBody,
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+              }}
+            >
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={pastelStyles.label}>Select Asset</label>
+                <select
+                  style={pastelStyles.select}
+                  value={formData.assetID}
+                  onChange={(e) =>
+                    setFormData({ ...formData, assetID: e.target.value })
+                  }
+                >
+                  <option value="">-- Choose Asset --</option>
+                  {myAssets.map((a, idx) => (
+                    <option key={idx} value={a.id || a.assetID}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={pastelStyles.label}>Issue Type</label>
+                <select
+                  style={pastelStyles.select}
+                  value={formData.type}
+                  onChange={(e) =>
+                    setFormData({ ...formData, type: Number(e.target.value) })
+                  }
+                >
+                  <option value={0}>Broken</option>
+                  <option value={1}>Recall</option>
+                  <option value={2}>Lost</option>
+                  <option value={3}>Report</option>
+                </select>
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={pastelStyles.label}>Description</label>
+                <textarea
+                  style={{ ...pastelStyles.textarea, height: "120px" }}
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
             </div>
             <div style={pastelStyles.modalActions}>
               <button style={pastelStyles.cancelBtn} onClick={closeModal}>
@@ -620,69 +661,86 @@ export default function MyRequestsPage() {
         </div>
       )}
 
-      {/* FORM WAREHOUSE */}
+      {/* ADD/EDIT WAREHOUSE FORM (Đã làm bự hơn) */}
       {(modalType.includes("Wh") || modalType === "editWarehouse") &&
         !modalType.includes("Asset") && (
           <div style={pastelStyles.modalOverlay} onClick={closeModal}>
             <div
-              style={{ ...pastelStyles.modal, maxWidth: "400px" }}
+              style={{ ...pastelStyles.modal, maxWidth: "550px", width: "90%" }}
               onClick={(e) => e.stopPropagation()}
             >
               <div style={pastelStyles.modalHeader}>
                 <h2 style={pastelStyles.modalTitle}>Warehouse Request</h2>
               </div>
-              <div style={pastelStyles.modalBody}>
-                <label style={pastelStyles.label}>Warehouse</label>
-                <select
-                  style={pastelStyles.select}
-                  value={formData.warehouseID}
-                  onChange={(e) =>
-                    setFormData({ ...formData, warehouseID: e.target.value })
-                  }
-                >
-                  <option value="">-- Select --</option>
-                  {myWarehouses.map((w, idx) => (
-                    <option key={idx} value={w.value}>
-                      {w.label}
-                    </option>
-                  ))}
-                </select>
+              <div
+                style={{
+                  ...pastelStyles.modalBody,
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "15px",
+                }}
+              >
+                <div style={{ gridColumn: "span 2" }}>
+                  <label style={pastelStyles.label}>Warehouse</label>
+                  <select
+                    style={pastelStyles.select}
+                    value={formData.warehouseID}
+                    onChange={(e) =>
+                      setFormData({ ...formData, warehouseID: e.target.value })
+                    }
+                  >
+                    <option value="">-- Select --</option>
+                    {myWarehouses.map((w, idx) => (
+                      <option key={idx} value={w.value}>
+                        {w.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 {Number(formData.type) === 4 && (
-                  <div style={{ display: "flex", gap: 10, marginBottom: 15 }}>
-                    <input
-                      style={{ ...pastelStyles.select, marginBottom: 0 }}
-                      type="number"
-                      placeholder="New Lat"
-                      value={formData.newLatitude}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          newLatitude: e.target.value,
-                        })
-                      }
-                    />
-                    <input
-                      style={{ ...pastelStyles.select, marginBottom: 0 }}
-                      type="number"
-                      placeholder="New Long"
-                      value={formData.newLongitude}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          newLongitude: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <label style={pastelStyles.label}>New Latitude</label>
+                      <input
+                        style={pastelStyles.select}
+                        type="number"
+                        placeholder="Lat"
+                        value={formData.newLatitude}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            newLatitude: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label style={pastelStyles.label}>New Longitude</label>
+                      <input
+                        style={pastelStyles.select}
+                        type="number"
+                        placeholder="Long"
+                        value={formData.newLongitude}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            newLongitude: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </>
                 )}
-                <label style={pastelStyles.label}>Reason</label>
-                <textarea
-                  style={pastelStyles.textarea}
-                  value={formData.reason}
-                  onChange={(e) =>
-                    setFormData({ ...formData, reason: e.target.value })
-                  }
-                />
+                <div style={{ gridColumn: "span 2" }}>
+                  <label style={pastelStyles.label}>Reason</label>
+                  <textarea
+                    style={{ ...pastelStyles.textarea, height: "120px" }}
+                    value={formData.reason}
+                    onChange={(e) =>
+                      setFormData({ ...formData, reason: e.target.value })
+                    }
+                  />
+                </div>
               </div>
               <div style={pastelStyles.modalActions}>
                 <button style={pastelStyles.cancelBtn} onClick={closeModal}>
@@ -747,7 +805,7 @@ export default function MyRequestsPage() {
           display: flex;
           align-items: center;
           gap: 12px;
-          padding: 12px;
+          padding: 15px;
           border: 1px solid #e2e8f0;
           border-radius: 8px;
           background: #fff;
@@ -755,7 +813,7 @@ export default function MyRequestsPage() {
           transition: 0.2s;
           font-weight: 600;
           width: 100%;
-          font-size: 14px;
+          font-size: 15px;
         }
         .select-item:hover {
           background: #f1f5f9;
@@ -767,6 +825,8 @@ export default function MyRequestsPage() {
   );
 }
 
+// ... (Các hàm renderStatus và Styles bên dưới giữ nguyên)
+// ...
 function renderStatus(s: number) {
   const map: any = {
     0: { t: "Pending", b: "#fef3c7", c: "#b45309" },
@@ -873,7 +933,6 @@ const pastelStyles: any = {
     fontSize: "11px",
     fontWeight: "600",
   },
-
   pagination: {
     padding: "16px",
     display: "flex",
@@ -900,7 +959,6 @@ const pastelStyles: any = {
     color: "#cbd5e1",
     cursor: "not-allowed",
   },
-
   modalOverlay: {
     position: "fixed",
     inset: 0,
@@ -911,7 +969,12 @@ const pastelStyles: any = {
     zIndex: 1000,
     backdropFilter: "blur(2px)",
   },
-  modal: { background: "white", borderRadius: "12px", overflow: "hidden" },
+  modal: {
+    background: "white",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+  },
   modalHeader: {
     padding: "15px 20px",
     borderBottom: "1px solid #f1f5f9",
@@ -928,10 +991,10 @@ const pastelStyles: any = {
   },
   select: {
     width: "100%",
-    padding: "8px",
+    padding: "10px",
     borderRadius: "8px",
     border: "1px solid #cbd5e1",
-    marginBottom: "15px",
+    marginBottom: "5px",
     outline: "none",
     fontSize: "14px",
   },

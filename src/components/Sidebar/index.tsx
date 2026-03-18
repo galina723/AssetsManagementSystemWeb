@@ -22,6 +22,7 @@ import {
   Build as FaTools,
   Email as FaEnvelopeOpenText,
   Notifications as FaBell,
+  AssignmentReturn as FaBriefcase, // Icon cho Personal Assets
 } from "@mui/icons-material";
 import axios from "axios";
 
@@ -34,6 +35,7 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
   const [openRequest, setOpenRequest] = useState(true);
+  const [openAssets, setOpenAssets] = useState(true); // State cho dropdown Assets
 
   useEffect(() => {
     const storedUsername = localStorage
@@ -77,14 +79,18 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
     }
   };
 
-  // Các role Manager có quyền cao
   const isManager = [
     "GeneralManager",
     "AssetManager",
     "WarehouseManager",
   ].includes(userRole);
 
+  // Kiểm tra role cho Staff/Technical (thường tương ứng ID 2, 3, 4)
+  const isStaffOrTech =
+    ["Staff", "TechnicalStaff", "Employee"].includes(userRole) || isManager;
+
   const handleToggleRequest = () => setOpenRequest(!openRequest);
+  const handleToggleAssets = () => setOpenAssets(!openAssets);
 
   const getActiveStyle = (path: string) => {
     const isActive = pathname === path;
@@ -149,7 +155,6 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
           </ListItemButton>
         ) : (
           <>
-            {/* NHÓM CHỈ DÀNH CHO MANAGER */}
             {isManager && (
               <>
                 <ListItemButton
@@ -163,16 +168,41 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
                   <ListItemText primary="Dashboard" />
                 </ListItemButton>
 
+                {/* Dropdown Assets cho Manager */}
                 <ListItemButton
-                  component={Link}
-                  href="/Assets"
-                  sx={getActiveStyle("/Assets")}
+                  onClick={handleToggleAssets}
+                  sx={{ color: "#adb5bd", borderRadius: "8px" }}
                 >
-                  <ListItemIcon sx={{ minWidth: 40 }}>
+                  <ListItemIcon sx={{ color: "inherit", minWidth: 40 }}>
                     <FaCube />
                   </ListItemIcon>
                   <ListItemText primary="Assets" />
+                  {openAssets ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
+                <Collapse in={openAssets} timeout="auto">
+                  <List component="div" disablePadding sx={{ pl: 2 }}>
+                    <ListItemButton
+                      component={Link}
+                      href="/Assets"
+                      sx={getActiveStyle("/Assets")}
+                    >
+                      <ListItemText
+                        primary="All Assets"
+                        primaryTypographyProps={{ fontSize: "14px", ml: 3 }}
+                      />
+                    </ListItemButton>
+                    <ListItemButton
+                      component={Link}
+                      href="/PersonalAssets"
+                      sx={getActiveStyle("/PersonalAssets")}
+                    >
+                      <ListItemText
+                        primary="My Assets"
+                        primaryTypographyProps={{ fontSize: "14px", ml: 3 }}
+                      />
+                    </ListItemButton>
+                  </List>
+                </Collapse>
 
                 <ListItemButton
                   component={Link}
@@ -187,7 +217,20 @@ const Sidebar: FC<Props> = ({ collapse = false }) => {
               </>
             )}
 
-            {/* NHÓM MÀ STAFF & TECHNICAL STAFF CŨNG THẤY */}
+            {/* HIỂN THỊ MY ASSET CHO STAFF (ROLE 2,3,4) NHƯNG KHÔNG PHẢI MANAGER */}
+            {!isManager && isStaffOrTech && (
+              <ListItemButton
+                component={Link}
+                href="/PersonalAssets"
+                sx={getActiveStyle("/PersonalAssets")}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <FaBriefcase />
+                </ListItemIcon>
+                <ListItemText primary="My Assets" />
+              </ListItemButton>
+            )}
+
             <ListItemButton
               component={Link}
               href="/Works"
