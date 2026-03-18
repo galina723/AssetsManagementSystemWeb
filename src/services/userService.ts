@@ -1,12 +1,12 @@
 import { connector } from "@/helper/service/service";
-import { UserModel } from "@/models/user/UserModel";
+// import { UserModel } from "@/models/user/UserModel";
 
 export class UserService {
   static async getAllUser() {
     const res = await connector.get(`/user`);
 
     if (res.status === 200) {
-      return res.data.data as UserModel[];
+      return res.data.data as any[];
     } else {
       return "fail";
     }
@@ -16,7 +16,7 @@ export class UserService {
     const res = await connector.get(`/user/${id}`);
 
     if (res.status === 200) {
-      return res.data.data as UserModel;
+      return res.data.data as any;
     } else {
       return "fail";
     }
