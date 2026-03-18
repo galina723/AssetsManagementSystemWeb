@@ -2,7 +2,7 @@
 //   id: number;
 //   username: string;
 //   password: string;
-import { User as UserT } from "../user/UserModel"; // }
+//import { User as UserT } from "../user/UserModel"; // }
 
 // API Response Types
 export interface ApiResponse<T = unknown> {
@@ -70,7 +70,7 @@ export interface AssetsResult {
 export interface AuthModel {
   success: boolean;
   token: string;
-  user: UserT;
+  user: any; // UserT;
   expiresIn: number;
   message: string;
 }
