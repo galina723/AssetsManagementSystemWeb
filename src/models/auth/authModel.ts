@@ -1,4 +1,4 @@
-import { User } from "../user/UserModel";
+// import { User } from "../user/UserModel";
 
 export interface LoginRequest {
   username: string;
@@ -8,7 +8,7 @@ export interface LoginRequest {
 export interface AuthModel {
   success: boolean;
   token: string;
-  user: User;
+  user: any;
   expiresIn: number;
   message: string;
 }

@@ -1,4 +1,4 @@
-import { UserModel } from "../models/user/UserModel";
+// import { UserModel } from "../models/user/UserModel";
 import { connector } from "@/helper/service/service";
 
 export class AccountService {
@@ -8,7 +8,7 @@ export class AccountService {
     console.log(res);
 
     if (res.status === 200) {
-      return res.data.data as UserModel[];
+      return res.data.data as any[];
     } else {
       return "fail";
     }
@@ -18,7 +18,7 @@ export class AccountService {
     const res = await connector.get(`/account/${id}`);
 
     if (res.status === 200) {
-      return res.data.data as UserModel;
+      return res.data.data as any;
     } else {
       return "fail";
     }

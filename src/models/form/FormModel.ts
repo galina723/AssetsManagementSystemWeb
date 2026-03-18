@@ -1,16 +1,16 @@
-import {UserModel} from '../user/UserModel';
-import {DynamicValue} from './DynamicValue';
+// import {UserModel} from '../user/UserModel';
+import { DynamicValue } from "./DynamicValue";
 
 type Type =
-  | 'radio'
-  | 'dateTime'
-  | 'date'
-  | 'select'
-  | 'lookup'
-  | 'number'
-  | 'yesno'
-  | 'user'
-  | 'input';
+  | "radio"
+  | "dateTime"
+  | "date"
+  | "select"
+  | "lookup"
+  | "number"
+  | "yesno"
+  | "user"
+  | "input";
 
 export interface FormModel {
   id: number;
@@ -23,5 +23,5 @@ export interface FormModel {
   defaultValue: any;
   value?: DynamicValue[];
   multiSelect?: boolean;
-  userData?: UserModel[];
+  userData?: any[];
 }
