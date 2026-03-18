@@ -1,5 +1,5 @@
-import { UserModel } from "../models/user/UserModel";
 import { connector } from "@/helper/service/service";
+import { UserModel } from "@/models/user/UserModel";
 
 export class UserService {
   static async getAllUser() {
