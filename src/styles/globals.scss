@@ -1,6 +1,12 @@
-@import "./components/index.scss";
-@import "./pages/index.scss";
-@import "./attributes.scss";
+:root {
+  --background: #f3f3f9;
+  --primary: #5290b5;
+  --white: #ffffff;
+  --foreground: #171717;
+  --secondary: #eaecf0;
+  --gray: #f0f0f0;
+  --gray-text: #b9b9b9;
+}
 
 html,
 body {
@@ -39,4 +45,267 @@ a {
 
 .app-main {
   padding: 24px;
+}
+
+.MuiSelect-icon {
+  transform: translate(24px, 0px);
+}
+
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow: auto;
+  height: calc(100vh - 64px - 48px);
+  &__section-1 {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+  }
+  &__section-2 {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    align-items: center;
+    &__selection-1 {
+      background-color: var(--white);
+      border-radius: 16px;
+      padding: 24px;
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      &__title {
+        font-size: 16px;
+        color: var(--gray-text);
+      }
+    }
+    &__selection-2 {
+      flex: 1;
+    }
+  }
+  &__section-3 {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+.auth {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &__container {
+    position: relative;
+    &--image {
+      border-radius: 32px;
+    }
+    &--content {
+      display: flex;
+      gap: 32px;
+      background-color: var(--background);
+      border-radius: 32px;
+      padding: 24px;
+      position: absolute;
+      top: 10%;
+      right: 6%;
+      flex-direction: column;
+      width: calc(40%);
+      height: calc(100% - 20%);
+      &--section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      &--section-1 {
+        gap: 14px;
+      }
+      &--section-3 {
+        margin-top: 16px;
+        gap: 24px;
+      }
+      &__forgot {
+        display: flex;
+        justify-content: flex-end;
+      }
+      &__title {
+        font-size: 32px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+      &__sub-title {
+        font-size: 16px;
+      }
+      &__login--btn {
+        border-radius: 54px !important;
+        background-color: var(--primary) !important;
+        height: 54px;
+      }
+    }
+  }
+}
+.assets-page {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: 16px;
+  background-color: var(--white);
+  gap: 24px;
+  &__container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: auto;
+    &__group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      &--label {
+        flex: 2;
+        color: gray;
+      }
+      &--input {
+        flex: 8;
+      }
+    }
+  }
+  &__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    &__title {
+      font-size: 24px;
+      font-weight: 600;
+      &__group {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+  }
+}
+
+.MuiInputBase-input {
+  padding: 4px !important;
+}
+
+.link-url-table {
+  text-decoration: none !important;
+}
+.app-sidebar {
+  background: var(--primary);
+  height: 100vh;
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0 8px 0;
+  gap: 16px;
+}
+
+.app-sidebar__logo {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 64px;
+  color: var(--white);
+}
+
+.app-sidebar__menu {
+  display: flex;
+  flex-direction: column;
+
+  &__item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 50px;
+    color: var(--secondary);
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding: 0 24px 0 24px;
+    &--active {
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
+  }
+
+  &__item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+  }
+
+  &--active {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+  }
+}
+.home-count-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--white);
+  padding: 24px;
+  border-radius: 16px;
+  width: 100%;
+
+  &__title {
+    font-size: 16px;
+    color: var(--gray-text);
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+    &__number {
+      font-weight: 600;
+      font-size: 32px;
+    }
+  }
+}
+.app-header {
+  height: 64px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.app-header__container {
+  height: 64px;
+  background: var(--white);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px 0 12px;
+  transition: 0.3s;
+}
+.dropdown {
+  border: 1px solid var(--gray-text);
+  border-radius: 4px;
+  width: 87%;
+  flex: 8;
+  &__box {
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.date-picker {
+  flex: 8;
 }

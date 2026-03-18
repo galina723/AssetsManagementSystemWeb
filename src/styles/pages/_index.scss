@@ -1,6 +1,6 @@
-@import "./home.scss";
-@import "./auth.scss";
-@import "./assets.scss";
+@use "./home.scss";
+@use "./auth.scss";
+@use "./assets.scss";
 
 .MuiSelect-icon {
   transform: translate(24px, 0px);
