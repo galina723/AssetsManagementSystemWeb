@@ -27,9 +27,9 @@ import {
 const THEME = {
   primary: "#6366F1", // Indigo hiện đại
   primaryLight: "#EEF2FF",
-  bg: "#FDFDFF", // Trắng hơi xanh rất nhẹ
-  cardBg: "rgba(255, 255, 255, 0.8)",
-  border: "#F1F5F9",
+  bg: "#F8FAFC", // Nền nền xám xanh nhạt dịu mắt
+  cardBg: "#FFFFFF",
+  border: "#E2E8F0",
   textMain: "#0F172A", // Slate 900
   textMuted: "#64748B", // Slate 500
   accent: "#C7D2FE", // Pastel Purple-Blue
@@ -106,127 +106,142 @@ const LoginPage = () => {
     );
 
   return (
-    <Box sx={rootStyles}>
-      {/* Background Decor */}
-      <Box sx={blobStyles} />
+    <>
+      {/* Khai báo Keyframes cho hiệu ứng xoay Gradient */}
+      <style jsx global>{`
+        @keyframes rotateGradient {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
 
-      <Container
-        maxWidth="sm"
-        sx={{ zIndex: 1, display: "flex", justifyContent: "center" }}
-      >
-        <Paper elevation={0} sx={cardStyles}>
-          <form onSubmit={handleLogin}>
-            <Box textAlign="center" mb={5}>
-              <Box sx={logoContainerStyles}>
-                <ShieldOutlined sx={{ fontSize: 32 }} />
-              </Box>
-              <Typography variant="h4" sx={titleStyles}>
-                AMS
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: THEME.textMuted, letterSpacing: "0.5px" }}
-              >
-                ASSET MANAGEMENT SYSTEM
-              </Typography>
-            </Box>
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <Box>
-                <Typography sx={labelStyles}>Username</Typography>
-                <TextField
-                  fullWidth
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  sx={inputStyles}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonOutlined
-                          sx={{ color: THEME.textMuted, fontSize: 20 }}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-
-              <Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={0.5}
-                >
-                  <Typography sx={labelStyles}>Password</Typography>
+      <Box sx={rootStyles}>
+        <Container
+          maxWidth="sm"
+          sx={{ zIndex: 1, display: "flex", justifyContent: "center" }}
+        >
+          {/* Vùng chứa bọc ngoài tạo hiệu ứng Animated Gradient Border */}
+          <Box sx={animatedBorderWrapperStyles}>
+            <Paper elevation={0} sx={cardStyles}>
+              <form onSubmit={handleLogin}>
+                <Box textAlign="center" mb={5}>
+                  <Box sx={logoContainerStyles}>
+                    <ShieldOutlined sx={{ fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h4" sx={titleStyles}>
+                    AMS
+                  </Typography>
                   <Typography
-                    variant="caption"
-                    sx={{
-                      color: THEME.primary,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
+                    variant="body2"
+                    sx={{ color: THEME.textMuted, letterSpacing: "0.5px" }}
                   >
-                    Forgot?
+                    ASSET MANAGEMENT SYSTEM
                   </Typography>
                 </Box>
-                <TextField
-                  fullWidth
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  sx={inputStyles}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockOutlined
-                          sx={{ color: THEME.textMuted, fontSize: 20 }}
-                        />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? (
-                            <VisibilityOff sx={{ fontSize: 18 }} />
-                          ) : (
-                            <Visibility sx={{ fontSize: 18 }} />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
 
-              <Button
-                fullWidth
-                type="submit"
-                disabled={loginLoading}
-                variant="contained"
-                disableElevation
-                sx={submitBtnStyles}
-              >
-                {loginLoading ? (
-                  <CircularProgress size={24} sx={{ color: "#fff" }} />
-                ) : (
-                  "Sign in"
-                )}
-              </Button>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  <Box>
+                    <Typography sx={labelStyles}>Username</Typography>
+                    <TextField
+                      fullWidth
+                      placeholder="Enter your username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      sx={inputStyles}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <PersonOutlined
+                              sx={{ color: THEME.textMuted, fontSize: 20 }}
+                            />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Box>
 
-              <Typography variant="caption" sx={footerNoteStyles}>
-                Secure environment. Authorized access only.
-              </Typography>
-            </Box>
-          </form>
-        </Paper>
-      </Container>
-    </Box>
+                  <Box>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={0.5}
+                    >
+                      <Typography sx={labelStyles}>Password</Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: THEME.primary,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Forgot?
+                      </Typography>
+                    </Box>
+                    <TextField
+                      fullWidth
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      sx={inputStyles}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockOutlined
+                              sx={{ color: THEME.textMuted, fontSize: 20 }}
+                            />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPassword(!showPassword)}
+                              edge="end"
+                              sx={{ color: THEME.textMuted }}
+                            >
+                              {showPassword ? (
+                                <VisibilityOff sx={{ fontSize: 18 }} />
+                              ) : (
+                                <Visibility sx={{ fontSize: 18 }} />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Box>
+
+                  <Button
+                    fullWidth
+                    type="submit"
+                    disabled={loginLoading}
+                    variant="contained"
+                    disableElevation
+                    sx={submitBtnStyles}
+                  >
+                    {loginLoading ? (
+                      <CircularProgress size={24} sx={{ color: "#fff" }} />
+                    ) : (
+                      "Sign in"
+                    )}
+                  </Button>
+
+                  <Typography variant="caption" sx={footerNoteStyles}>
+                    Secure environment. Authorized access only.
+                  </Typography>
+                </Box>
+              </form>
+            </Paper>
+          </Box>
+        </Container>
+      </Box>
+    </>
   );
 };
 
@@ -239,43 +254,42 @@ const rootStyles = {
   position: "relative",
   overflow: "hidden",
   backgroundColor: THEME.bg,
-  backgroundImage: `
-    linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%),
-    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%)
-  `,
+  backgroundImage: `radial-gradient(circle at top right, #EEF2FF 0%, transparent 40%),
+                    radial-gradient(circle at bottom left, #FDF4FF 0%, transparent 40%)`, // Gradient nền tinh tế
+};
+
+// --- HIỆU ỨNG ANIMATED PASTEL BORDER ---
+const animatedBorderWrapperStyles = {
+  position: "relative",
+  width: "100%",
+  maxWidth: 440,
+  borderRadius: "32px",
+  padding: "4px", // Độ dày của cái viền mờ ảo
+  background: "#fff",
+  overflow: "hidden",
+  boxShadow: "0 25px 50px -12px rgba(99, 102, 241, 0.15)", // Đổ bóng dịu
   "&::before": {
-    // Thêm texture nhẹ
     content: '""',
     position: "absolute",
-    width: "100%",
-    height: "100%",
-    opacity: 0.03,
-    backgroundImage: `url("https://www.transparenttextures.com/patterns/cubes.png")`,
+    top: "-50%",
+    left: "-50%",
+    width: "200%",
+    height: "200%",
+    // Dải gradient pastel lặp lại nhiều màu: Tím nhạt -> Hồng phấn -> Xanh Mint -> Tím nhạt
+    background:
+      "conic-gradient(from 0deg, transparent 0%, #C7D2FE 20%, #FBCFE8 40%, #A7F3D0 60%, transparent 80%)",
+    animation: "rotateGradient 6s linear infinite",
+    zIndex: 0,
   },
 };
 
-const blobStyles = {
-  position: "absolute",
-  width: "500px",
-  height: "500px",
-  background: `linear-gradient(135deg, ${THEME.accent} 0%, #E0E7FF 100%)`,
-  filter: "blur(80px)",
-  borderRadius: "50%",
-  top: "-10%",
-  right: "-5%",
-  zIndex: 0,
-  opacity: 0.5,
-};
-
 const cardStyles = {
+  position: "relative", // Phải có relative để nổi lên trên ::before
+  zIndex: 1, // Nổi lên trên nền xoay
   width: "100%",
-  maxWidth: 440,
   p: { xs: 4, md: 6 },
-  borderRadius: "32px",
-  backdropFilter: "blur(10px)",
+  borderRadius: "28px", // Bo nhỏ hơn viền ngoài một chút để khít
   backgroundColor: THEME.cardBg,
-  border: `1px solid rgba(255, 255, 255, 0.7)`,
-  boxShadow: "0 20px 40px -15px rgba(0,0,0,0.05)",
 };
 
 const logoContainerStyles = {
@@ -288,7 +302,7 @@ const logoContainerStyles = {
   alignItems: "center",
   justifyContent: "center",
   margin: "0 auto 20px",
-  boxShadow: "0 8px 16px -4px rgba(99, 102, 241, 0.15)",
+  boxShadow: "0 8px 16px -4px rgba(99, 102, 241, 0.2)",
   border: `1px solid ${THEME.primaryLight}`,
 };
 
@@ -312,12 +326,12 @@ const labelStyles = {
 const inputStyles = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "16px",
-    backgroundColor: "rgba(248, 250, 252, 0.8)",
+    backgroundColor: "#F8FAFC",
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    "& fieldset": { borderColor: THEME.border },
+    "& fieldset": { borderColor: THEME.border, borderWidth: "1px" },
     "&:hover": {
       backgroundColor: "#fff",
-      "& fieldset": { borderColor: THEME.accent },
+      "& fieldset": { borderColor: "#CBD5E1" },
     },
     "&.Mui-focused": {
       backgroundColor: "#fff",
@@ -338,8 +352,8 @@ const submitBtnStyles = {
   transition: "all 0.2s ease",
   "&:hover": {
     backgroundColor: "#4F46E5",
-    transform: "translateY(-1px)",
-    boxShadow: "0 12px 24px -6px rgba(99, 102, 241, 0.5)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 14px 24px -6px rgba(99, 102, 241, 0.5)",
   },
   "&:active": {
     transform: "translateY(0)",
