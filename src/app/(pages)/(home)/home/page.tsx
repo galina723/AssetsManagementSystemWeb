@@ -17,23 +17,54 @@ import {
   Box,
 } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { BarChart } from "@mui/x-charts/BarChart";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+
+// --- Hàm hỗ trợ định dạng ---
+const formatDate = (dateString: string) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
+
+// --- MAPPING THEO CHUẨN STAFF REQUEST PAGE ---
+const REPORT_TYPES: { [key: number]: string } = {
+  0: "Broken",
+  1: "Recall",
+  2: "Lost",
+  3: "Report",
+  4: "Location Change",
+  5: "Wh. Delete",
+};
+
+const getRequestStatusUi = (status: number) => {
+  const map: any = {
+    0: { label: "Pending", bg: "#fef3c7", color: "#b45309" }, // Vàng/Cam
+    1: { label: "Accepted", bg: "#dcfce7", color: "#15803d" }, // Xanh lá
+    2: { label: "Rejected", bg: "#fee2e2", color: "#b91c1c" }, // Đỏ
+  };
+  return map[status] || { label: "Unknown", bg: "#f1f5f9", color: "#475569" }; // Xám
+};
 
 const HomePage = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [assets, setAssets] = useState<AssetModel[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
 
   const [summary, setSummary] = useState({
     totalAssets: 0,
-    totalWarehouses: 0,
     totalAccounts: 0,
     pendingWorks: 0,
+    totalRequests: 0,
     assetStatusDist: [] as any[],
-    warehouseDist: [] as any[],
   });
 
   // ✨ Pastel Bling Palette
@@ -68,13 +99,9 @@ const HomePage = () => {
         },
       };
 
-      const [assetRes, warehouseRes, accountRes, workRes] = await Promise.all([
+      const [assetRes, accountRes, workRes, requestRes] = await Promise.all([
         axios.get(
           "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset",
-          config,
-        ),
-        axios.get(
-          "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/warehouse",
           config,
         ),
         axios.get(
@@ -85,14 +112,19 @@ const HomePage = () => {
           "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/work/get-work-createdList",
           config,
         ),
+        axios.get(
+          "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/RequestReport/staff-requestList",
+          config,
+        ),
       ]);
 
       const assetList = assetRes.data.data || [];
-      const warehouseList = warehouseRes.data.data || [];
       const accountList = accountRes.data.data || [];
       const workList = workRes.data.data || [];
+      const requestList = requestRes.data.data || [];
 
       setAssets(assetList);
+      setRequests(requestList);
 
       const statusCounts = assetList.reduce((acc: any, curr: any) => {
         acc[curr.status] = (acc[curr.status] || 0) + 1;
@@ -101,22 +133,16 @@ const HomePage = () => {
 
       setSummary({
         totalAssets: assetList.length,
-        totalWarehouses: warehouseList.length,
         totalAccounts: accountList.length,
         pendingWorks: workList.filter((w: any) => w.status !== "Completed")
           .length,
+        totalRequests: requestList.length,
 
         assetStatusDist: Object.keys(statusCounts).map((key, idx) => ({
           id: idx,
           value: statusCounts[key],
           label: key,
           color: blingColors[idx % blingColors.length],
-        })),
-
-        warehouseDist: warehouseList.map((w: any) => ({
-          label: w.name,
-          value: assetList.filter((a: any) => a.warehouseID === w.warehouseID)
-            .length,
         })),
       });
     } catch (err) {
@@ -183,8 +209,8 @@ const HomePage = () => {
           }}
         >
           <CountItem
-            title="🏠 Warehouses"
-            count={summary.totalWarehouses}
+            title="📩 Staff Requests"
+            count={summary.totalRequests}
             color="#B5EAD7"
           />
         </div>
@@ -216,7 +242,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* 🍭 SECTION 2: BLING CHARTS (SYMMETRIC FLEXBOX) */}
+      {/* 🍭 SECTION 2: CHARTS & REQUEST TABLE */}
       <div
         style={{
           display: "flex",
@@ -230,7 +256,7 @@ const HomePage = () => {
         <Paper
           style={{
             flex: 1,
-            minWidth: "450px",
+            minWidth: "350px",
             padding: "30px",
             borderRadius: "28px",
             boxShadow: "0 15px 35px rgba(200, 200, 255, 0.1)",
@@ -245,6 +271,7 @@ const HomePage = () => {
               fontWeight: 800,
               color: "#6A7B9B",
               letterSpacing: "0.5px",
+              textAlign: "center",
             }}
           >
             Asset Status Distribution
@@ -271,59 +298,159 @@ const HomePage = () => {
           </div>
         </Paper>
 
-        {/* BAR CHART CARD */}
+        {/* REQUESTS TABLE CARD */}
         <Paper
           style={{
-            flex: 1,
-            minWidth: "450px",
+            flex: 2,
+            minWidth: "500px",
             padding: "30px",
             borderRadius: "28px",
             boxShadow: "0 15px 35px rgba(200, 200, 255, 0.1)",
             border: "2px solid #FFFFFF",
             background: "linear-gradient(135deg, #FFFFFF 0%, #F9F9FF 100%)",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <Typography
             variant="h6"
             style={{
-              marginBottom: "25px",
+              marginBottom: "15px",
               fontWeight: 800,
               color: "#6A7B9B",
               letterSpacing: "0.5px",
             }}
           >
-            Assets per Warehouse
+            Recent Staff Requests
           </Typography>
-          <div style={{ height: "300px" }}>
-            <BarChart
-              xAxis={[
-                {
-                  scaleType: "band",
-                  // ✨ Capped at 5 characters + ... for bling aesthetics
-                  data: summary.warehouseDist.map((d) =>
-                    d.label.length > 5
-                      ? d.label.substring(0, 5) + "..."
-                      : d.label,
-                  ),
-                  categoryGapRatio: 0.6,
-                },
-              ]}
-              series={[
-                {
-                  data: summary.warehouseDist.map((d) => d.value),
-                  color: "#C7CEEA", // Bling Lavender
-                  label: "Assets",
-                },
-              ]}
-              height={300}
-              margin={{ top: 20, bottom: 40, left: 45, right: 10 }}
-              borderRadius={12}
-            />
-          </div>
+          <TableContainer style={{ flexGrow: 1, overflowX: "auto" }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    style={{
+                      fontWeight: 800,
+                      color: "#A0AEC0",
+                      fontSize: "0.75rem",
+                      borderBottom: "1px solid #EDF2F7",
+                      textAlign: "center",
+                    }}
+                  >
+                    NO.
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: 800,
+                      color: "#A0AEC0",
+                      fontSize: "0.75rem",
+                      borderBottom: "1px solid #EDF2F7",
+                    }}
+                  >
+                    REQUESTER
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: 800,
+                      color: "#A0AEC0",
+                      fontSize: "0.75rem",
+                      borderBottom: "1px solid #EDF2F7",
+                    }}
+                  >
+                    TYPE
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: 800,
+                      color: "#A0AEC0",
+                      fontSize: "0.75rem",
+                      borderBottom: "1px solid #EDF2F7",
+                    }}
+                  >
+                    DATE
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      fontWeight: 800,
+                      color: "#A0AEC0",
+                      fontSize: "0.75rem",
+                      borderBottom: "1px solid #EDF2F7",
+                    }}
+                  >
+                    STATUS
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {requests.slice(0, 5).map((req, index) => {
+                  const statusUi = getRequestStatusUi(req.status);
+                  return (
+                    <TableRow
+                      key={req.id}
+                      hover
+                      sx={{
+                        "& td": { borderBottom: "1px dashed #EDF2F7" },
+                        "&:hover": { backgroundColor: "#FDFCFE !important" },
+                      }}
+                    >
+                      <TableCell
+                        style={{
+                          fontWeight: 700,
+                          color: "#C7CEEA",
+                          textAlign: "center",
+                        }}
+                      >
+                        {index + 1}
+                      </TableCell>
+                      <TableCell style={{ fontWeight: 600, color: "#4A5568" }}>
+                        {req.createdBy}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          style={{
+                            padding: "4px 8px",
+                            background: "#e0e7ff",
+                            color: "#4338ca",
+                            borderRadius: "4px",
+                            fontWeight: 600,
+                            fontSize: "11px",
+                          }}
+                        >
+                          {REPORT_TYPES[req.type] || req.type}
+                        </span>
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          color: "#718096",
+                          fontSize: "0.85rem",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {formatDate(req.createdDate)}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={statusUi.label}
+                          size="small"
+                          sx={{
+                            backgroundColor: statusUi.bg,
+                            color: statusUi.color,
+                            fontWeight: 800,
+                            borderRadius: "16px",
+                            fontSize: "11px",
+                            minWidth: "75px",
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
       </div>
 
-      {/* 🎀 SECTION 3: ELEGANT LIST TABLE */}
+      {/* 🎀 SECTION 3: INVENTORY INSIGHT */}
       <div className="home-page__section-3">
         <Typography
           variant="h6"
