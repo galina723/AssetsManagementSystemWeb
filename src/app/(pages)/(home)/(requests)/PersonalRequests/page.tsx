@@ -15,6 +15,8 @@ import {
   FaChevronRight,
   FaExclamationCircle,
   FaUserCircle,
+  FaCheck,
+  FaTimes,
 } from "react-icons/fa";
 
 const mainPastelColor = "#3b82f6";
@@ -43,6 +45,8 @@ export default function MyRequestsPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [myWarehouses, setMyWarehouses] = useState<any[]>([]);
   const [myAssets, setMyAssets] = useState<any[]>([]);
+  const [userRole, setUserRole] = useState<string>("");
+
   const [toast, setToast] = useState<{
     msg: string;
     type: "success" | "error";
@@ -76,6 +80,17 @@ export default function MyRequestsPage() {
     setTimeout(() => setToast(null), 4000);
   };
 
+  // Helper to decode JWT token to get the user ID
+  const getUserIdFromToken = () => {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.nameid || payload.sub || payload.id;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const fetchInitialData = async () => {
     if (!token) return;
     try {
@@ -83,6 +98,7 @@ export default function MyRequestsPage() {
         Authorization: `Bearer ${token}`,
         "ngrok-skip-browser-warning": "true",
       };
+
       const [resReports, resAssets, resWH] = await Promise.allSettled([
         axios.get(`${BASE_URL}/requestreport/created-list-request`, {
           headers,
@@ -90,12 +106,27 @@ export default function MyRequestsPage() {
         axios.get(`${BASE_URL}/Asset/my-assets`, { headers }),
         axios.get(`${BASE_URL}/Warehouse/dropdown-warehouse`, { headers }),
       ]);
+
       if (resReports.status === "fulfilled")
         setReports(resReports.value.data.data || []);
       if (resAssets.status === "fulfilled")
         setMyAssets(resAssets.value.data.data || []);
       if (resWH.status === "fulfilled")
         setMyWarehouses(resWH.value.data.data || []);
+
+      // Fetch User Role to check for GeneralManager
+      const userId = getUserIdFromToken();
+      if (userId) {
+        try {
+          const resUser = await axios.get(`${BASE_URL}/Account/${userId}`, {
+            headers,
+          });
+          const fetchedRole = resUser.data?.data?.role || resUser.data?.role;
+          setUserRole(fetchedRole);
+        } catch (roleErr) {
+          console.error("Could not fetch user role", roleErr);
+        }
+      }
     } catch (err) {
       showToast("Failed to load data", "error");
     }
@@ -121,6 +152,35 @@ export default function MyRequestsPage() {
       setModalType("none");
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  const handleProcessApproval = async (
+    requestID: number,
+    newStatus: number,
+  ) => {
+    try {
+      await axios.post(
+        `${BASE_URL}/RequestReport/process-approval`,
+        {
+          requestID,
+          newStatus,
+          comment: "Self-processed by General Manager",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        },
+      );
+      showToast(
+        `Request ${newStatus === 1 ? "approved" : "rejected"} successfully!`,
+      );
+      fetchInitialData(); // Refresh list to reflect changes
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Approval failed!", "error");
     }
   };
 
@@ -263,72 +323,110 @@ export default function MyRequestsPage() {
               </tr>
             </thead>
             <tbody>
-              {currentReports.map((r, i) => (
-                <tr key={r.id || i} className="table-row-style">
-                  <td style={pastelStyles.td}>
-                    {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
-                  </td>
-                  <td style={pastelStyles.td}>
-                    <span style={pastelStyles.typeBadge}>
-                      {RequestTypeConfig[r.type]}
-                    </span>
-                  </td>
-                  <td style={pastelStyles.td}>{r.description || r.reason}</td>
-                  <td style={pastelStyles.td}>
-                    {renderStatus(r.currentStatus ?? r.status)}
-                  </td>
-                  <td style={{ ...pastelStyles.td, ...pastelStyles.actionCol }}>
-                    <button
+              {currentReports.map((r, i) => {
+                const isPending = r.currentStatus === 0 || r.status === 0;
+
+                return (
+                  <tr key={r.id || i} className="table-row-style">
+                    <td style={pastelStyles.td}>
+                      {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
+                    </td>
+                    <td style={pastelStyles.td}>
+                      <span style={pastelStyles.typeBadge}>
+                        {RequestTypeConfig[r.type]}
+                      </span>
+                    </td>
+                    <td style={pastelStyles.td}>{r.description || r.reason}</td>
+                    <td style={pastelStyles.td}>
+                      {renderStatus(r.currentStatus ?? r.status)}
+                    </td>
+                    <td
                       style={{
-                        ...pastelStyles.iconBtn,
-                        ...pastelStyles.viewBtn,
+                        ...pastelStyles.td,
+                        ...pastelStyles.actionCol,
                       }}
-                      onClick={() => handleOpenView(r.id)}
                     >
-                      <FaEye />
-                    </button>
-                    {(r.currentStatus === 0 || r.status === 0) && (
-                      <>
-                        <button
-                          style={{
-                            ...pastelStyles.iconBtn,
-                            ...pastelStyles.editBtn,
-                          }}
-                          onClick={() => {
-                            setFormData({
-                              id: r.id,
-                              type: r.type,
-                              assetID: r.assetID || "",
-                              description: r.description || "",
-                              warehouseID: r.warehouseID || "",
-                              newLatitude: r.newLatitude || "",
-                              newLongitude: r.newLongitude || "",
-                              reason: r.reason || r.description || "",
-                            });
-                            setModalType(
-                              r.type <= 3 ? "editAsset" : "editWarehouse",
-                            );
-                          }}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          style={{
-                            ...pastelStyles.iconBtn,
-                            ...pastelStyles.deleteBtn,
-                          }}
-                          onClick={() => {
-                            setDeleteTarget(r.id);
-                            setModalType("confirmDelete");
-                          }}
-                        >
-                          <FaTrash />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                      <button
+                        style={{
+                          ...pastelStyles.iconBtn,
+                          ...pastelStyles.viewBtn,
+                        }}
+                        onClick={() => handleOpenView(r.id)}
+                      >
+                        <FaEye />
+                      </button>
+
+                      {isPending && (
+                        <>
+                          <button
+                            style={{
+                              ...pastelStyles.iconBtn,
+                              ...pastelStyles.editBtn,
+                            }}
+                            onClick={() => {
+                              setFormData({
+                                id: r.id,
+                                type: r.type,
+                                assetID: r.assetID || "",
+                                description: r.description || "",
+                                warehouseID: r.warehouseID || "",
+                                newLatitude: r.newLatitude || "",
+                                newLongitude: r.newLongitude || "",
+                                reason: r.reason || r.description || "",
+                              });
+                              setModalType(
+                                r.type <= 3 ? "editAsset" : "editWarehouse",
+                              );
+                            }}
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            style={{
+                              ...pastelStyles.iconBtn,
+                              ...pastelStyles.deleteBtn,
+                            }}
+                            onClick={() => {
+                              setDeleteTarget(r.id);
+                              setModalType("confirmDelete");
+                            }}
+                          >
+                            <FaTrash />
+                          </button>
+
+                          {/* GENERAL MANAGER SELF-APPROVAL ACTIONS */}
+                          {userRole === "GeneralManager" && (
+                            <>
+                              <button
+                                style={{
+                                  ...pastelStyles.iconBtn,
+                                  background: "#dcfce7",
+                                  color: "#15803d",
+                                }}
+                                title="Approve Request"
+                                onClick={() => handleProcessApproval(r.id, 1)}
+                              >
+                                <FaCheck />
+                              </button>
+                              <button
+                                style={{
+                                  ...pastelStyles.iconBtn,
+                                  background: "#fee2e2",
+                                  color: "#b91c1c",
+                                }}
+                                title="Reject Request"
+                                onClick={() => handleProcessApproval(r.id, 2)}
+                              >
+                                <FaTimes />
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
