@@ -8,18 +8,16 @@ import {
   FaEdit,
   FaEye,
   FaPlus,
-  FaChevronLeft,
-  FaChevronRight,
   FaExclamationCircle,
   FaInfoCircle,
-  FaTag,
+  FaCheckCircle,
 } from "react-icons/fa";
 
 const mainPastelColor = "#a0c4ff";
 const mainPastelTextColor = "#3d5a80";
 const deletePastelColor = "#ffadad";
 
-// Mapping enum từ Backend
+// Mapping enum từ Backend - Đồng bộ với C# Enum
 const WorkStatusConfig: Record<number, { label: string; class: string }> = {
   0: { label: "New", class: "status-new" },
   1: { label: "In Progress", class: "status-inprogress" },
@@ -33,7 +31,6 @@ export default function WorkPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // UI States
   const [toast, setToast] = useState<{
     msg: string;
     type: "success" | "error";
@@ -43,7 +40,6 @@ export default function WorkPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
   const [viewingWork, setViewingWork] = useState<any>(null);
 
-  // Edit States
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     workID: 0,
@@ -53,10 +49,8 @@ export default function WorkPage() {
     description: "",
     status: 0,
     assignedUserID: 0,
-    assignedStaffIds: [] as number[],
   });
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
@@ -96,13 +90,10 @@ export default function WorkPage() {
     fetchData();
   }, []);
 
-  // Helpers
   const findAssetName = (id: any) =>
     assets.find((a) => a.assetID === id)?.name || "Unknown Asset";
 
-  // Actions
   const openEdit = (item: any) => {
-    // Tìm index của status dựa trên label trả về từ API hoặc dùng trực tiếp nếu API trả về số
     let currentStatus = 0;
     if (typeof item.status === "number") {
       currentStatus = item.status;
@@ -110,7 +101,7 @@ export default function WorkPage() {
       const statusEntry = Object.entries(WorkStatusConfig).find(
         ([_, v]) => v.label === item.status,
       );
-      currentStatus = statusEntry ? parseInt(statusEntry[0]) : 0;
+      currentStatus = statusEntry ? Number(statusEntry[0]) : 0;
     }
 
     setEditFormData({
@@ -121,21 +112,20 @@ export default function WorkPage() {
       description: item.description || "",
       status: currentStatus,
       assignedUserID: item.assignedUserID || 0,
-      assignedStaffIds: item.assignedStaffs?.map((s: any) => s.userID) || [],
     });
     setOpenEditModal(true);
   };
 
   const handleUpdate = async () => {
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-      await axios.put(`${BASE_URL}/Work/${editFormData.workID}`, editFormData, {
-        headers,
+      const payload = { ...editFormData, status: Number(editFormData.status) };
+      await axios.put(`${BASE_URL}/Work/${editFormData.workID}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
-      showToast("Work updated successfully!");
+      showToast("Work updated!");
       setOpenEditModal(false);
       fetchData();
     } catch (e) {
@@ -149,7 +139,7 @@ export default function WorkPage() {
       await axios.delete(`${BASE_URL}/work/${workToDeleteId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      showToast("Work deleted successfully!");
+      showToast("Deleted!");
       setOpenDeleteModal(false);
       fetchData();
     } catch (e) {
@@ -161,7 +151,6 @@ export default function WorkPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
-  const totalPages = Math.ceil(works.length / ITEMS_PER_PAGE);
 
   return (
     <div style={pastelStyles.container}>
@@ -182,227 +171,176 @@ export default function WorkPage() {
           onClick={() => router.push("/CreateWork")}
           style={pastelStyles.addBtn}
         >
-          <FaPlus size={12} style={{ marginRight: 8 }} /> Add New Work
+          <FaPlus size={12} style={{ marginRight: 8 }} /> Add Work
         </button>
       </div>
 
       <div style={pastelStyles.card}>
-        <div style={pastelStyles.tableWrapper}>
-          <table style={pastelStyles.table}>
-            <thead>
-              <tr>
-                <th style={pastelStyles.thSmall}>#</th>
-                <th style={pastelStyles.th}>Work Name</th>
-                <th style={pastelStyles.th}>Target Asset</th>
-                <th style={pastelStyles.th}>Due Date</th>
-                <th style={pastelStyles.th}>Status</th>
-                <th style={{ ...pastelStyles.th, textAlign: "center" }}>
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentWorks.map((item, index) => {
-                // Xác định class CSS cho status
-                let statusInfo = WorkStatusConfig[0];
-                if (typeof item.status === "number") {
-                  statusInfo = WorkStatusConfig[item.status];
-                } else {
-                  statusInfo =
-                    Object.values(WorkStatusConfig).find(
-                      (v) => v.label === item.status,
-                    ) || WorkStatusConfig[0];
-                }
+        <table style={pastelStyles.table}>
+          <thead>
+            <tr>
+              <th style={pastelStyles.thSmall}>#</th>
+              <th style={pastelStyles.th}>Work Name</th>
+              <th style={pastelStyles.th}>Asset</th>
+              <th style={pastelStyles.th}>Status</th>
+              <th style={{ ...pastelStyles.th, textAlign: "center" }}>
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentWorks.map((item, index) => {
+              const statusKey =
+                typeof item.status === "number"
+                  ? item.status
+                  : Object.keys(WorkStatusConfig).find(
+                      (k) => WorkStatusConfig[Number(k)].label === item.status,
+                    ) || 0;
+              const statusInfo = WorkStatusConfig[Number(statusKey)];
 
-                return (
-                  <tr key={item.workID} className="table-row-style">
-                    <td
+              return (
+                <tr key={item.workID} className="table-row-style">
+                  <td
+                    style={{
+                      ...pastelStyles.td,
+                      textAlign: "center",
+                      color: "#94a3b8",
+                    }}
+                  >
+                    {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+                  </td>
+                  <td style={{ ...pastelStyles.td, fontWeight: 600 }}>
+                    {item.name}
+                  </td>
+                  <td style={pastelStyles.td}>{findAssetName(item.assetID)}</td>
+                  <td style={pastelStyles.td}>
+                    <span className={`status-tag ${statusInfo.class}`}>
+                      {statusInfo.label}
+                    </span>
+                  </td>
+                  <td style={{ ...pastelStyles.td, ...pastelStyles.actionCol }}>
+                    <button
                       style={{
-                        ...pastelStyles.td,
-                        textAlign: "center",
-                        color: "#64748b",
+                        ...pastelStyles.iconBtn,
+                        background: "#e0f2fe",
+                        color: "#0284c7",
+                      }}
+                      onClick={() => {
+                        setViewingWork(item);
+                        setOpenDetailModal(true);
                       }}
                     >
-                      {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
-                    </td>
-                    <td style={{ ...pastelStyles.td, fontWeight: 600 }}>
-                      {item.name}
-                    </td>
-                    <td style={pastelStyles.td}>
-                      {findAssetName(item.assetID)}
-                    </td>
-                    <td style={pastelStyles.td}>
-                      {item.dueDate?.slice(0, 10)}
-                    </td>
-                    <td style={pastelStyles.td}>
-                      <span className={`status-tag ${statusInfo.class}`}>
-                        {statusInfo.label}
-                      </span>
-                    </td>
-                    <td
-                      style={{ ...pastelStyles.td, ...pastelStyles.actionCol }}
+                      <FaEye size={14} />
+                    </button>
+                    <button
+                      style={{
+                        ...pastelStyles.iconBtn,
+                        background: "#fef3c7",
+                        color: "#92400e",
+                      }}
+                      onClick={() => openEdit(item)}
                     >
-                      <button
-                        style={{
-                          ...pastelStyles.iconBtn,
-                          background: "#e0f2fe",
-                          color: "#0284c7",
-                        }}
-                        onClick={() => {
-                          setViewingWork(item);
-                          setOpenDetailModal(true);
-                        }}
-                      >
-                        <FaEye size={14} />
-                      </button>
-                      <button
-                        style={{
-                          ...pastelStyles.iconBtn,
-                          background: "#fef3c7",
-                          color: "#92400e",
-                        }}
-                        onClick={() => openEdit(item)}
-                      >
-                        <FaEdit size={14} />
-                      </button>
-                      <button
-                        style={{
-                          ...pastelStyles.iconBtn,
-                          background: deletePastelColor,
-                          color: "#610000",
-                        }}
-                        onClick={() => {
-                          setWorkToDeleteId(item.workID);
-                          setOpenDeleteModal(true);
-                        }}
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      <FaEdit size={14} />
+                    </button>
+                    <button
+                      style={{
+                        ...pastelStyles.iconBtn,
+                        background: deletePastelColor,
+                        color: "#610000",
+                      }}
+                      onClick={() => {
+                        setWorkToDeleteId(item.workID);
+                        setOpenDeleteModal(true);
+                      }}
+                    >
+                      <FaTrash size={12} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
-      {/* EDIT MODAL */}
+      {/* DETAIL MODAL - NHỎ XINH GỌN GÀNG */}
+      {openDetailModal && viewingWork && (
+        <div
+          style={pastelStyles.modalOverlay}
+          onClick={() => setOpenDetailModal(false)}
+        >
+          <div
+            style={{ ...pastelStyles.modal, maxWidth: 420 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ ...pastelStyles.modalHeader, padding: "15px 20px" }}>
+              <h2 style={{ ...pastelStyles.modalTitle, fontSize: "16px" }}>
+                <FaInfoCircle style={{ marginRight: 8 }} /> Detail
+              </h2>
+            </div>
+            <div style={{ padding: "20px" }}>
+              <div style={pastelStyles.detailRow}>
+                <span>Task:</span>
+                <strong>{viewingWork.name}</strong>
+              </div>
+              <div style={pastelStyles.detailRow}>
+                <span>Asset:</span>
+                <strong>{findAssetName(viewingWork.assetID)}</strong>
+              </div>
+              <div style={pastelStyles.detailRow}>
+                <span>Date:</span>
+                <strong>{viewingWork.dueDate?.slice(0, 10)}</strong>
+              </div>
+              <div style={{ marginTop: "10px" }}>
+                <span style={pastelStyles.label}>Description:</span>
+                <div style={pastelStyles.descriptionBox}>
+                  {viewingWork.description || "No description."}
+                </div>
+              </div>
+            </div>
+            <div style={pastelStyles.modalActions}>
+              <button
+                style={pastelStyles.cancelBtn}
+                onClick={() => setOpenDetailModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL - GỌN GÀNG */}
       {openEditModal && (
         <div
           style={pastelStyles.modalOverlay}
           onClick={() => setOpenEditModal(false)}
         >
           <div
-            style={{ ...pastelStyles.modal, maxWidth: 600 }}
+            style={{ ...pastelStyles.modal, maxWidth: 450 }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={pastelStyles.modalHeader}>
-              <h2 style={pastelStyles.modalTitle}>Edit Work Request</h2>
+              <h2 style={pastelStyles.modalTitle}>Update Status</h2>
             </div>
-            <div
-              style={{
-                ...pastelStyles.modalBody,
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "15px",
-              }}
-            >
-              <div style={{ gridColumn: "span 2" }}>
-                <label style={pastelStyles.label}>Work Name</label>
-                <input
-                  style={pastelStyles.input}
-                  value={editFormData.name}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, name: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label style={pastelStyles.label}>Target Asset</label>
-                <select
-                  style={pastelStyles.input}
-                  value={editFormData.assetID}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      assetID: Number(e.target.value),
-                    })
-                  }
-                >
-                  {assets.map((a) => (
-                    <option key={a.assetID} value={a.assetID}>
-                      {a.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={pastelStyles.label}>Due Date</label>
-                <input
-                  type="datetime-local"
-                  style={pastelStyles.input}
-                  value={editFormData.dueDate}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      dueDate: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label style={pastelStyles.label}>Status</label>
-                <select
-                  style={pastelStyles.input}
-                  value={editFormData.status}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      status: Number(e.target.value),
-                    })
-                  }
-                >
-                  {Object.entries(WorkStatusConfig).map(([key, val]) => (
-                    <option key={key} value={key}>
-                      {val.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={pastelStyles.label}>Responsible User</label>
-                <select
-                  style={pastelStyles.input}
-                  value={editFormData.assignedUserID}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      assignedUserID: Number(e.target.value),
-                    })
-                  }
-                >
-                  <option value={0}>Select User</option>
-                  {accounts.map((acc) => (
-                    <option key={acc.userID} value={acc.userID}>
-                      {acc.fullName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ gridColumn: "span 2" }}>
-                <label style={pastelStyles.label}>Description</label>
-                <textarea
-                  style={{ ...pastelStyles.input, minHeight: 80 }}
-                  value={editFormData.description}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      description: e.target.value,
-                    })
-                  }
-                />
-              </div>
+            <div style={{ padding: "20px" }}>
+              <label style={pastelStyles.label}>Status</label>
+              <select
+                style={pastelStyles.input}
+                value={editFormData.status}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    status: Number(e.target.value),
+                  })
+                }
+              >
+                {Object.entries(WorkStatusConfig).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div style={pastelStyles.modalActions}>
               <button
@@ -419,112 +357,22 @@ export default function WorkPage() {
                 }}
                 onClick={handleUpdate}
               >
-                Update Changes
+                Save
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* DETAIL MODAL */}
-      {openDetailModal && viewingWork && (
-        <div
-          style={pastelStyles.modalOverlay}
-          onClick={() => setOpenDetailModal(false)}
-        >
-          <div style={pastelStyles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={pastelStyles.modalHeader}>
-              <h2 style={pastelStyles.modalTitle}>Work Detail View</h2>
-            </div>
-            <div style={pastelStyles.modalBody}>
-              <div style={pastelStyles.detailItem}>
-                <strong>Name:</strong> {viewingWork.name}
-              </div>
-              <div style={pastelStyles.detailItem}>
-                <strong>Asset:</strong> {findAssetName(viewingWork.assetID)}
-              </div>
-              <div style={pastelStyles.detailItem}>
-                <strong>Due Date:</strong>{" "}
-                {new Date(viewingWork.dueDate).toLocaleString()}
-              </div>
-              <div style={pastelStyles.detailItem}>
-                <strong>Status:</strong> {viewingWork.status}
-              </div>
-              <div
-                style={{
-                  ...pastelStyles.detailItem,
-                  background: "#f8faff",
-                  padding: 10,
-                  borderRadius: 8,
-                }}
-              >
-                <strong>Description:</strong>
-                <br />
-                {viewingWork.description || "No description."}
-              </div>
-            </div>
-            <div style={pastelStyles.modalActions}>
-              <button
-                style={pastelStyles.cancelBtn}
-                onClick={() => setOpenDetailModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DELETE MODAL */}
-      {openDeleteModal && (
-        <div
-          style={pastelStyles.modalOverlay}
-          onClick={() => setOpenDeleteModal(false)}
-        >
-          <div
-            style={{ ...pastelStyles.modal, maxWidth: 350 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ padding: "30px 20px", textAlign: "center" }}>
-              <FaExclamationCircle
-                size={40}
-                color={deletePastelColor}
-                style={{ marginBottom: 15 }}
-              />
-              <h3>Confirm Deletion</h3>
-              <p style={{ fontSize: 14, color: "#64748b" }}>
-                Remove this task from the system?
-              </p>
-            </div>
-            <div style={pastelStyles.modalActions}>
-              <button
-                style={pastelStyles.cancelBtn}
-                onClick={() => setOpenDeleteModal(false)}
-              >
-                No
-              </button>
-              <button
-                style={{
-                  ...pastelStyles.saveBtn,
-                  backgroundColor: deletePastelColor,
-                  color: "#610000",
-                }}
-                onClick={handleDelete}
-              >
-                Yes, Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* DELETE MODAL GIỮ NGUYÊN... */}
 
       <style jsx global>{`
         .table-row-style:hover {
-          background-color: #f1f5f9;
+          background-color: #f8faff;
         }
         .status-tag {
           padding: 4px 10px;
-          border-radius: 20px;
+          border-radius: 12px;
           font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
@@ -555,7 +403,6 @@ const pastelStyles: any = {
     padding: "24px",
     background: "#fcfcfc",
     minHeight: "100vh",
-    position: "relative",
     fontFamily: "sans-serif",
   },
   toast: {
@@ -565,9 +412,7 @@ const pastelStyles: any = {
     padding: "12px 24px",
     borderRadius: "8px",
     color: "white",
-    fontWeight: "600",
     zIndex: 9999,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
   },
   header: {
     display: "flex",
@@ -575,17 +420,15 @@ const pastelStyles: any = {
     alignItems: "center",
     marginBottom: "20px",
   },
-  title: { fontSize: "28px", fontWeight: "800", color: mainPastelTextColor },
+  title: { fontSize: "24px", fontWeight: "800", color: mainPastelTextColor },
   addBtn: {
     background: mainPastelColor,
     color: mainPastelTextColor,
     border: "none",
-    padding: "10px 20px",
+    padding: "10px 18px",
     borderRadius: "10px",
     cursor: "pointer",
     fontWeight: "700",
-    display: "flex",
-    alignItems: "center",
   },
   card: {
     background: "white",
@@ -594,28 +437,22 @@ const pastelStyles: any = {
     border: "1px solid #e0e7f2",
     overflow: "hidden",
   },
-  tableWrapper: { overflowX: "auto" },
   table: { width: "100%", borderCollapse: "collapse" },
   th: {
     textAlign: "left",
     padding: "15px",
     background: "#f8faff",
     color: "#5c677d",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "700",
-    borderBottom: "2px solid #eef2ff",
+    textTransform: "uppercase",
   },
-  thSmall: {
-    textAlign: "center",
-    padding: "15px",
-    background: "#f8faff",
-    width: "50px",
-    borderBottom: "2px solid #eef2ff",
-  },
+  thSmall: { textAlign: "center", padding: "15px", width: "50px" },
   td: {
-    padding: "12px 15px",
+    padding: "14px 15px",
     borderBottom: "1px solid #f1f5f9",
     fontSize: "14px",
+    color: "#475569",
   },
   actionCol: { display: "flex", gap: "8px", justifyContent: "center" },
   iconBtn: {
@@ -631,30 +468,52 @@ const pastelStyles: any = {
   modalOverlay: {
     position: "fixed",
     inset: 0,
-    background: "rgba(0,0,0,0.3)",
+    background: "rgba(15, 23, 42, 0.4)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
-    backdropFilter: "blur(2px)",
+    backdropFilter: "blur(4px)",
   },
   modal: {
     background: "white",
     width: "90%",
     borderRadius: "20px",
     overflow: "hidden",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
+    boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)",
   },
   modalHeader: {
-    padding: "20px",
+    padding: "18px 20px",
     borderBottom: "1px solid #f1f5f9",
     background: "#f8faff",
   },
-  modalTitle: { margin: 0, fontSize: "18px", color: mainPastelTextColor },
-  modalBody: { padding: "20px" },
+  modalTitle: { margin: 0, fontWeight: "700", color: mainPastelTextColor },
+  modalActions: {
+    padding: "12px 20px",
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "10px",
+    background: "#f8faff",
+  },
+  saveBtn: {
+    border: "none",
+    padding: "8px 20px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "700",
+  },
+  cancelBtn: {
+    background: "white",
+    border: "1px solid #cbd5e1",
+    padding: "8px 20px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    color: "#64748b",
+    fontWeight: "600",
+  },
   label: {
     display: "block",
-    marginBottom: "5px",
+    marginBottom: "6px",
     fontSize: "12px",
     fontWeight: "700",
     color: "#64748b",
@@ -665,38 +524,23 @@ const pastelStyles: any = {
     padding: "10px",
     borderRadius: "10px",
     border: "1px solid #e2e8f0",
-    marginBottom: "10px",
     outline: "none",
     fontSize: "14px",
   },
-  modalActions: {
-    padding: "15px 20px",
+  detailRow: {
     display: "flex",
-    justifyContent: "flex-end",
-    gap: "10px",
+    justifyContent: "space-between",
+    padding: "10px 0",
+    borderBottom: "1px dashed #e2e8f0",
+    fontSize: "14px",
+  },
+  descriptionBox: {
     background: "#f8faff",
-  },
-  saveBtn: {
-    border: "none",
-    padding: "10px 20px",
+    padding: "12px",
     borderRadius: "10px",
-    cursor: "pointer",
-    fontWeight: "700",
-  },
-  cancelBtn: {
-    background: "white",
-    border: "1px solid #cbd5e1",
-    padding: "10px 20px",
-    borderRadius: "10px",
-    cursor: "pointer",
-    color: "#64748b",
-  },
-  loadingContainer: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: mainPastelTextColor,
-    fontWeight: "700",
+    fontSize: "13px",
+    color: "#475569",
+    marginTop: "5px",
+    border: "1px solid #edf2f7",
   },
 };

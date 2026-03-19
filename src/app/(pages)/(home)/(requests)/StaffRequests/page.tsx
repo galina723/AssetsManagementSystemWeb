@@ -304,7 +304,6 @@ export default function RequestReportPage() {
             >
               <div style={pastelStyles.modalHeader}>
                 <h2 style={pastelStyles.modalTitle}>Process Request</h2>
-                <p style={pastelStyles.modalSubtitle}>ID: {form.requestID}</p>
               </div>
               <div style={pastelStyles.modalBody}>
                 <label style={pastelStyles.label}>Decision</label>
