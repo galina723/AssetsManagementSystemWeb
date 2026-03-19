@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { FaPlus, FaClipboard, FaFileAlt } from "react-icons/fa";
+import { FaPlus, FaClipboard, FaFileAlt, FaUser } from "react-icons/fa";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -18,24 +18,42 @@ const mainPastelTextColor = "#3d5a80"; // Màu chữ tối nhẹ
 export default function CreateWork() {
   const router = useRouter();
   const [assets, setAssets] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+
   const [form, setForm] = useState({
     assetID: 0,
     name: "",
     dueDate: null as any,
     description: "",
+    assignedUserID: 0,
+    assignedStaffIds: [] as number[],
   });
 
-  // GET ASSETS (Logic không đổi)
+  // GET ASSETS & ACCOUNTS CÙNG LÚC
   useEffect(() => {
-    axios
-      .get("https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "ngrok-skip-browser-warning": "true",
-        },
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "ngrok-skip-browser-warning": "true",
+      },
+    };
+
+    Promise.all([
+      axios.get(
+        "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/asset",
+        config,
+      ),
+      axios.get(
+        "https://lumbar-mora-uncoroneted.ngrok-free.dev/api/account",
+        config,
+      ),
+    ])
+      .then(([assetRes, accountRes]) => {
+        setAssets(assetRes.data?.data || []);
+        setAccounts(accountRes.data?.data || []);
       })
-      .then((res) => setAssets(res.data?.data || []))
-      .catch((err) => console.log(err));
+      .catch((err) => console.log("Fetch Error:", err));
   }, []);
 
   const handleChange = (key: string, value: any) => {
@@ -43,10 +61,21 @@ export default function CreateWork() {
   };
 
   const handleSubmit = async () => {
+    if (form.assignedUserID === 0) {
+      alert("Please select a user to assign this work!");
+      return;
+    }
+
     try {
+      // ✨ FIX QUAN TRỌNG:
+      // Ép assignedUserID vào mảng assignedStaffIds để Backend tạo record trong bảng Assignments
       const body = {
-        ...form,
+        assetID: Number(form.assetID),
+        name: form.name,
         dueDate: form.dueDate ? dayjs(form.dueDate).toISOString() : null,
+        description: form.description,
+        assignedUserID: Number(form.assignedUserID),
+        assignedStaffIds: [Number(form.assignedUserID)], // Đưa ID vào mảng để fix lỗi assignments rỗng
       };
 
       await axios.post(
@@ -60,11 +89,11 @@ export default function CreateWork() {
         },
       );
 
-      alert("Created successfully!");
+      alert("Created successfully! User should now see this in their list.");
       router.push("/Works");
     } catch (err) {
-      console.log(err);
-      alert("Failed to create work");
+      console.error(err);
+      alert("Failed to create work. Check console for details.");
     }
   };
 
@@ -74,39 +103,33 @@ export default function CreateWork() {
       width: "100%",
       display: "flex",
       justifyContent: "center",
-      padding: "40px", // Tăng padding
-      background: "#fcfcfc", // Nền Pastel
+      padding: "40px",
+      background: "#fcfcfc",
       minHeight: "100vh",
     },
     card: {
-      width: "660px", // Rộng hơn
+      width: "660px",
       background: "white",
-      padding: "40px", // Tăng padding
+      padding: "40px",
       borderRadius: "16px",
-      // Shadow Pastel nhẹ
       boxShadow: "0 8px 22px rgba(160, 196, 255, 0.15)",
       border: "1px solid #e0e7f2",
       display: "flex",
       flexDirection: "column",
-      gap: "28px", // Tăng gap
+      gap: "28px",
     },
     title: {
-      fontSize: "28px", // Tăng size
+      fontSize: "28px",
       fontWeight: 700,
       textAlign: "center",
       marginBottom: "10px",
-      letterSpacing: "0.5px",
-      color: mainPastelTextColor, // Màu text Pastel
+      color: mainPastelTextColor,
     },
-    field: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px", // Tăng gap
-    },
+    field: { display: "flex", flexDirection: "column", gap: "8px" },
     label: {
       fontSize: "15px",
       fontWeight: 600,
-      color: "#5c677d", // Màu label Pastel
+      color: "#5c677d",
       display: "flex",
       alignItems: "center",
       gap: "8px",
@@ -114,15 +137,10 @@ export default function CreateWork() {
     input: {
       padding: "12px 14px",
       borderRadius: "10px",
-      border: `1px solid ${mainPastelColor}`, // Border Pastel
+      border: `1px solid ${mainPastelColor}`,
       fontSize: "15px",
-      transition: "0.2s",
       backgroundColor: "#f7f9fc",
       outline: "none",
-      "&:focus": {
-        borderColor: mainPastelHoverColor,
-        boxShadow: `0 0 0 2px ${mainPastelColor}80`,
-      },
     },
     select: {
       padding: "12px 14px",
@@ -131,25 +149,17 @@ export default function CreateWork() {
       fontSize: "15px",
       background: "#f7f9fc",
       cursor: "pointer",
-      color: "#333",
       outline: "none",
-      appearance: "none", // Bỏ style default của browser
     },
     textarea: {
-      height: "120px", // Tăng chiều cao
+      height: "120px",
       padding: "12px 14px",
       fontSize: "15px",
       borderRadius: "10px",
       border: `1px solid ${mainPastelColor}`,
-      resize: "vertical",
       backgroundColor: "#f7f9fc",
       outline: "none",
-      "&:focus": {
-        borderColor: mainPastelHoverColor,
-        boxShadow: `0 0 0 2px ${mainPastelColor}80`,
-      },
     },
-    // Style cho nút Submit (Pastel Nổi bật)
     btn: {
       padding: "14px",
       background: `linear-gradient(145deg, ${mainPastelHoverColor}, ${mainPastelColor})`,
@@ -163,42 +173,23 @@ export default function CreateWork() {
       alignItems: "center",
       justifyContent: "center",
       gap: "10px",
-      marginTop: "10px",
       boxShadow: "0 6px 15px rgba(160, 196, 255, 0.4)",
-      transition: "all 0.3s ease-in-out",
-
-      "&:hover": {
-        background: `linear-gradient(145deg, ${mainPastelColor}, ${mainPastelHoverColor})`,
-        boxShadow: "0 8px 20px rgba(160, 196, 255, 0.6)",
-        transform: "translateY(-1px)",
-      },
+      transition: "all 0.3s ease",
     },
   };
 
-  // 🔥 Định nghĩa style cho DatePicker TextField (để áp dụng style Pastel)
   const dateTimePickerTextFieldSx = {
     "& .MuiOutlinedInput-root": {
       borderRadius: "10px",
       backgroundColor: "#f7f9fc",
-      "& fieldset": {
-        borderColor: mainPastelColor,
-      },
-      "&:hover fieldset": {
-        borderColor: mainPastelHoverColor,
-      },
+      "& fieldset": { borderColor: mainPastelColor },
+      "&:hover fieldset": { borderColor: mainPastelHoverColor },
       "&.Mui-focused fieldset": {
         borderColor: mainPastelColor,
         borderWidth: "2px",
       },
     },
-    "& .MuiInputLabel-root": {
-      color: "#5c677d",
-    },
-    // Đảm bảoDateTimePicker trông giống TextField bình thường
-    "& .MuiInputBase-input": {
-      padding: "12px 14px",
-      fontSize: "15px",
-    },
+    "& .MuiInputBase-input": { padding: "12px 14px", fontSize: "15px" },
   };
 
   return (
@@ -232,14 +223,38 @@ export default function CreateWork() {
             >
               <option value={0}>-- Select Asset --</option>
               {assets.map((asset, index) => (
-                <option key={asset.assetID} value={asset.assetID}>
+                <option
+                  key={`asset-${asset.assetID || index}`}
+                  value={asset.assetID}
+                >
                   {index + 1}. {asset.name} — #{asset.code}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* DUE DATE - MUI */}
+          {/* ASSIGN USER SELECT */}
+          <div style={styles.field}>
+            <label style={styles.label}>
+              <FaUser /> Assign Responsible Staff
+            </label>
+            <select
+              style={styles.select}
+              value={form.assignedUserID}
+              onChange={(e) =>
+                handleChange("assignedUserID", Number(e.target.value))
+              }
+            >
+              <option value={0}>-- Select Staff --</option>
+              {accounts.map((acc, index) => (
+                <option key={`user-${acc.userID || index}`} value={acc.userID}>
+                  {acc.username} ({acc.role})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* DUE DATE */}
           <div style={styles.field}>
             <label style={styles.label}>Due Date</label>
             <DateTimePicker
@@ -249,7 +264,7 @@ export default function CreateWork() {
                 textField: {
                   fullWidth: true,
                   size: "small",
-                  sx: dateTimePickerTextFieldSx, // Áp dụng style Pastel
+                  sx: dateTimePickerTextFieldSx,
                 },
               }}
             />
@@ -268,10 +283,8 @@ export default function CreateWork() {
             />
           </div>
 
-          {/* SUBMIT */}
           <button style={styles.btn} onClick={handleSubmit}>
-            <FaPlus />
-            Create Work
+            <FaPlus /> Create & Assign Work
           </button>
         </div>
       </div>

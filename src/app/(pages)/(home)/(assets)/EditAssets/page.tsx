@@ -8,6 +8,7 @@ import {
   CircularProgress,
   Typography,
   Box,
+  MenuItem, // Thêm MenuItem cho dropdown
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -17,20 +18,19 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 
 // 🔥 Màu chính Pastel
-const mainPastelColor = "#a0c4ff"; // Xanh pastel
+const mainPastelColor = "#a0c4ff";
 const mainPastelHoverColor = "#b8cffc";
-const mainPastelTextColor = "#3d5a80"; // Màu chữ tối nhẹ
+const mainPastelTextColor = "#3d5a80";
 
-// 🔥 Style cho TextField (Pastel) - Dùng cho các Input trong trang Add
 const pastelTextFieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: "10px",
-    backgroundColor: "#f7f9fc", // Nền input màu sáng
+    backgroundColor: "#f7f9fc",
     "& fieldset": {
-      borderColor: mainPastelColor, // Border xanh pastel
+      borderColor: mainPastelColor,
     },
     "&:hover fieldset": {
-      borderColor: mainPastelHoverColor, // Hover đậm hơn một chút
+      borderColor: mainPastelHoverColor,
     },
     "&.Mui-focused fieldset": {
       borderColor: mainPastelColor,
@@ -65,12 +65,13 @@ const EditAssetsPage = () => {
     warrantyDepartment: "",
     latitude: "",
     longitude: "",
+    status: 0, // Thêm mới
+    isInWarehouse: true, // Thêm mới
   });
 
   const setField = (k: string, v: any) =>
     setFormData((p) => ({ ...p, [k]: v }));
 
-  // Load asset (giữ nguyên logic)
   useEffect(() => {
     if (!id) return;
 
@@ -100,11 +101,12 @@ const EditAssetsPage = () => {
           note: d.note ?? "",
           purpose: d.purpose ?? "",
           supplier: d.supplier ?? "",
-          // 🔥 Quantity đã được loại bỏ khi load data
           warrantyDuration: d.warrantyDuration ?? "",
           warrantyDepartment: d.warrantyDepartment ?? "",
           latitude: d.latitude ?? "",
           longitude: d.longitude ?? "",
+          status: d.status ?? 0, // Load data mới
+          isInWarehouse: d.isInWarehouse ?? true, // Load data mới
         });
       } catch (err) {
         console.error(err);
@@ -123,7 +125,7 @@ const EditAssetsPage = () => {
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
-      const parseNumber = (value: string) =>
+      const parseNumber = (value: any) =>
         isNaN(Number(value)) ? 0 : Number(value);
 
       const payload = {
@@ -139,11 +141,12 @@ const EditAssetsPage = () => {
         note: formData.note,
         purpose: formData.purpose,
         supplier: formData.supplier,
-        // 🔥 Quantity đã được loại bỏ khỏi payload
         warrantyDuration: parseNumber(formData.warrantyDuration),
         warrantyDepartment: formData.warrantyDepartment,
         latitude: parseNumber(formData.latitude),
         longitude: parseNumber(formData.longitude),
+        status: parseNumber(formData.status), // Gửi payload mới
+        isInWarehouse: formData.isInWarehouse, // Gửi payload mới
       };
 
       await axios.put(
@@ -186,15 +189,9 @@ const EditAssetsPage = () => {
     );
 
   return (
-    <Box
-      style={pastelStyles.page} // Dùng style page của Add Asset
-    >
-      {/* HEADER */}
+    <Box style={pastelStyles.page}>
       <Box style={pastelStyles.header}>
-        <Box
-          className="title-group"
-          sx={{ display: "flex", alignItems: "center", gap: 2 }}
-        >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton
             onClick={() => router.push("/Assets")}
             sx={{ color: mainPastelTextColor }}
@@ -209,7 +206,6 @@ const EditAssetsPage = () => {
           </Typography>
         </Box>
 
-        {/* SAVE BUTTON - STYLE PASTEL NỔI BẬT */}
         <Button
           variant="contained"
           startIcon={
@@ -227,30 +223,21 @@ const EditAssetsPage = () => {
             paddingX: 3.5,
             paddingY: 1.4,
             fontSize: "1rem",
-
             background: `linear-gradient(145deg, ${mainPastelHoverColor}, ${mainPastelColor})`,
             color: mainPastelTextColor,
-
             boxShadow: "0 6px 15px rgba(160, 196, 255, 0.4)",
-
             "&:hover": {
               background: `linear-gradient(145deg, ${mainPastelColor}, ${mainPastelHoverColor})`,
               boxShadow: "0 8px 20px rgba(160, 196, 255, 0.6)",
               transform: "translateY(-1px)",
             },
             transition: "all 0.3s ease-in-out",
-            "&.Mui-disabled": {
-              backgroundColor: mainPastelHoverColor,
-              opacity: 0.7,
-              color: mainPastelTextColor,
-            },
           }}
         >
           {saving ? "Saving..." : "Save"}
         </Button>
       </Box>
 
-      {/* FORM CARD - Bọc form trong Card style của Add Asset */}
       <Box style={pastelStyles.card}>
         <div style={pastelStyles.formGrid}>
           {/* Left col */}
@@ -258,17 +245,35 @@ const EditAssetsPage = () => {
             <AssetInput
               label="Asset Name"
               value={formData.name}
-              onChange={(e) => setField("name", e.target.value)}
+              onChange={(e: any) => setField("name", e.target.value)}
             />
             <AssetInput
               label="Code"
               value={formData.code}
-              onChange={(e) => setField("code", e.target.value)}
+              onChange={(e: any) => setField("code", e.target.value)}
             />
+
+            {/* TRƯỜNG STATUS MỚI */}
+            <Box style={pastelStyles.inputGroup}>
+              <label style={pastelStyles.label}>Status</label>
+              <TextField
+                select
+                value={formData.status}
+                onChange={(e) => setField("status", e.target.value)}
+                fullWidth
+                size="small"
+                sx={pastelTextFieldSx}
+              >
+                <MenuItem value={0}>Active (0)</MenuItem>
+                <MenuItem value={1}>Maintenance (1)</MenuItem>
+                <MenuItem value={2}>Broken (2)</MenuItem>
+              </TextField>
+            </Box>
+
             <AssetInput
               label="Position"
               value={formData.position}
-              onChange={(e) => setField("position", e.target.value)}
+              onChange={(e: any) => setField("position", e.target.value)}
             />
 
             <Box>
@@ -285,60 +290,52 @@ const EditAssetsPage = () => {
                 }}
               />
             </Box>
-
-            <AssetInput
-              label="Price"
-              value={formData.price}
-              onChange={(e) => setField("price", e.target.value)}
-            />
-            <AssetInput
-              label="Unit"
-              value={formData.unit}
-              onChange={(e) => setField("unit", e.target.value)}
-            />
-            <AssetInput
-              label="Currency"
-              value={formData.currency}
-              onChange={(e) => setField("currency", e.target.value)}
-            />
           </div>
 
           {/* Right col */}
           <div style={pastelStyles.column}>
             <AssetInput
-              label="Purpose"
-              value={formData.purpose}
-              onChange={(e) => setField("purpose", e.target.value)}
+              label="Price"
+              value={formData.price}
+              onChange={(e: any) => setField("price", e.target.value)}
             />
+
+            {/* TRƯỜNG IN WAREHOUSE MỚI */}
+            <Box style={pastelStyles.inputGroup}>
+              <label style={pastelStyles.label}>In Warehouse</label>
+              <TextField
+                select
+                value={formData.isInWarehouse.toString()}
+                onChange={(e) =>
+                  setField("isInWarehouse", e.target.value === "true")
+                }
+                fullWidth
+                size="small"
+                sx={pastelTextFieldSx}
+              >
+                <MenuItem value="true">True (In Stock)</MenuItem>
+                <MenuItem value="false">False (Out of Stock)</MenuItem>
+              </TextField>
+            </Box>
+
             <AssetInput
               label="Supplier"
               value={formData.supplier}
-              onChange={(e) => setField("supplier", e.target.value)}
+              onChange={(e: any) => setField("supplier", e.target.value)}
             />
-            {/* 🔥 Quantity field removed */}
             <AssetInput
               label="Warranty Duration (months)"
               value={formData.warrantyDuration}
-              onChange={(e) => setField("warrantyDuration", e.target.value)}
+              onChange={(e: any) =>
+                setField("warrantyDuration", e.target.value)
+              }
             />
             <AssetInput
-              label="Warranty Department"
-              value={formData.warrantyDepartment}
-              onChange={(e) => setField("warrantyDepartment", e.target.value)}
-            />
-            <AssetInput
-              label="Latitude"
-              value={formData.latitude}
-              onChange={(e) => setField("latitude", e.target.value)}
-            />
-            <AssetInput
-              label="Longitude"
-              value={formData.longitude}
-              onChange={(e) => setField("longitude", e.target.value)}
+              label="Note"
+              value={formData.note}
+              onChange={(e: any) => setField("note", e.target.value)}
             />
           </div>
-
-          {/* Note - Full width field */}
         </div>
       </Box>
     </Box>
@@ -347,7 +344,6 @@ const EditAssetsPage = () => {
 
 export default EditAssetsPage;
 
-// 🔥 Component Input sử dụng TextField MUI thay vì input HTML để style đồng nhất
 const AssetInput = ({
   label,
   value,
@@ -372,10 +368,6 @@ const AssetInput = ({
   </div>
 );
 
-// ============================
-// 🔥 PASTEL STYLE ĐỒNG NHẤT VỚI TRANG ADD
-// ============================
-
 const pastelStyles: any = {
   page: {
     padding: "32px",
@@ -383,7 +375,7 @@ const pastelStyles: any = {
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
-    gap: "30px", // Khoảng cách giữa header và card
+    gap: "30px",
   },
   header: {
     display: "flex",
@@ -416,12 +408,5 @@ const pastelStyles: any = {
     fontSize: "14px",
     fontWeight: 600,
     color: "#5c677d",
-  },
-  // Sử dụng layout cho Note tương tự như trang Add
-  noteGroup: {
-    gridColumn: "1 / -1",
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
   },
 };
